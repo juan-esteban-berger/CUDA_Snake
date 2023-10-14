@@ -28,7 +28,7 @@ void GenerateFood() {
     bool positionOccupied;
     do {
         foodX = (rand() % (width - 2)) + 1;
-        foodY = rand() % (height - 2) + 1;
+        foodY = rand()rewar % (height - 2) + 1;
 
         // Ensure foodX has the same parity as x
         while (x % 2 != foodX % 2) {
