@@ -4,7 +4,13 @@
 #include <ctime>
 #include <unistd.h>
 #include <ncurses.h>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <random>
 
+########################################################################################################################################################
+# Normal Mode
 // Definitions (and initial values) for the globals
 bool gameOver;
 int x, y, foodX, foodY, score;
@@ -223,4 +229,76 @@ void Draw_Ended(){
     std::cout << "\n";
     std::cout << "\n";
     std::cout << "Score: " << score << "\n";
+}
+
+
+########################################################################################################################################################
+# AI Mode
+int get_prediction(){
+    // Random number engine
+    std::random_device rd;  
+    std::mt19937 gen(rd()); 
+
+    // Uniform distribution in the range [1, 4]
+    std::uniform_int_distribution<> distrib(1, 4);
+
+    int random_number = distrib(gen);
+
+    return random_number;
+}
+
+########################################################################################################################################################
+# Training Mode
+void record_state(){
+    // Declare a 2x2 array
+    int array[2][2] = {
+        {1, 2},
+        {3, 4}
+    };
+
+    // Print the array
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            std::cout << array[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Open a file for writing
+    std::ofstream file("output.csv");
+
+    if(!file.is_open()) {
+        std::cerr << "Failed to open the file for writing." << std::endl;
+        return 1;
+    }
+
+    // Write the array to the file
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            file << array[i][j];
+            if(j != 1) file << ",";
+        }
+        file << std::endl;
+    }
+
+    file.close();
+
+    std::cout << "Array saved to output.csv" << std::endl;
+
+    // Now, let's read and print the contents of the CSV
+    std::ifstream inputFile("output.csv");
+
+    if(!inputFile.is_open()) {
+        std::cerr << "Failed to open the file for reading." << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    while(getline(inputFile, line)) {
+        std::cout << line << std::endl;
+    }
+
+    inputFile.close();
+
+    return 0;
 }
