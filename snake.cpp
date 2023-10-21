@@ -1,8 +1,14 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <deque>
 #include <random>
 #include <ctime>
 #include <ncurses.h>
+#include <vector>
+#include <cmath>
+#include <cstdlib>
+
 
 ////////////////////////////////////////////////////////////////////////
 // Variable Definitions
@@ -137,6 +143,32 @@ void board_to_1D(){
     }
   }
 }
+
+////////////////////////////////////////////////////////////////////////
+// Machine Learning
+// ReLU Function
+double relu(double x){
+  return std::max(0.0, x);
+}
+
+// Derivative of ReLU Function
+double relu_derivative(double x){
+  if (x > 0){
+    return 1.0;
+  }
+  else{
+    return 0.0;
+  }
+}
+
+class NeuralNetwork{
+  private:
+    int input_nodes;
+    int hidden_nodes;
+    int output_nodes;
+  public:
+
+};
 
 ////////////////////////////////////////////////////////////////////////
 // Main Function
