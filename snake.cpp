@@ -6,6 +6,7 @@
 #include <ctime>
 #include <ncurses.h>
 #include <vector>
+#include <functional>
 #include <cmath>
 #include <cstdlib>
 
@@ -161,13 +162,56 @@ double relu_derivative(double x){
   }
 }
 
-class NeuralNetwork{
-  private:
-    int input_nodes;
-    int hidden_nodes;
-    int output_nodes;
+class Layer {
   public:
+    std::vector<std::vector<double>> weights;
+    std::vector<double> biases;
+    std::vector<double> outputs;
+    int inputSize, outputSize;
+    std::function<double(double)> activationFunction;
 
+    Layer(int inputSize, int outputSize, std::function<double(double)> activationFunction)
+        : inputSize(inputSize), outputSize(outputSize), activationFunction(activationFunction) {
+      // Randomly initialize weights and biases
+      weights.resize(outputSize, std::vector<double>(inputSize));
+      biases.resize(outputSize);
+      for (int i = 0; i < outputSize; ++i) {
+        for (int j = 0; j < inputSize; ++j) {
+          weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+        }
+        biases[i] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+      }
+    }
+
+    std::vector<double> forward(const std::vector<double>& input) {
+      outputs.resize(outputSize);
+      for (int i = 0; i < outputSize; ++i) {
+        outputs[i] = 0;
+        for (int j = 0; j < inputSize; ++j) {
+          outputs[i] += input[j] * weights[i][j];
+        }
+        outputs[i] += biases[i];
+        outputs[i] = activationFunction(outputs[i]);
+      }
+      return outputs;
+    }
+};
+
+// Neural Network Class
+class NeuralNetwork{
+  public:
+    std::vector<Layer> layers;
+        void addLayer(int inputSize, int outputSize, std::function<double(double)> activationFunction) {
+        layers.emplace_back(inputSize, outputSize, activationFunction);
+    }
+
+    std::vector<double> predict(const std::vector<double>& input) {
+        std::vector<double> currentOutput = input;
+        for (Layer& layer : layers) {
+            currentOutput = layer.forward(currentOutput);
+        }
+        return currentOutput;
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -216,6 +260,45 @@ int main(){
   }
   // AI Mode
   else if (choice == 2){
+    system("clear");
+    std::cout << "Please select a model: " << std::endl;
+    std::cout << "placeholder_model.csv" << std::endl;
+    std::cout << "placeholder_model.csv" << std::endl;
+    std::cout << "placeholder_model.csv" << std::endl;
+    std::cout << "4. Exit" << std::endl;
+    std::cout << "Enter your choice: ";
+    std::cin >> choice;
+
+    system("clear");
+
+//////////////////////////////////////////////////////////////////////
+  NeuralNetwork nn;
+  nn.addLayer(1604, 800, relu);
+  nn.addLayer(800, 400, relu);
+  nn.addLayer(200, 4, relu);
+
+
+  std::vector<double> input = {1.0, 0.5, -1.5};
+  std::cout << "Input: ";
+  int count = 0;
+  for (double value : input) {
+      std::cout << value << " ";
+      if (count == 3) {  // This condition will be true after printing the fourth element
+          break;
+      }
+      count++;
+  }
+  std::cout << "\n";
+  std::vector<double> output = nn.predict(input);
+
+  std::cout << "Predictions: ";
+  for (double value : output) {
+      std::cout << value << " ";
+   }
+  std::cout << "\n";
+
+//////////////////////////////////////////////////////////////////////
+
     set_walls();
 
     snake.push_back({2,3});
