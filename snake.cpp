@@ -54,11 +54,17 @@ std::deque<std::pair<int, int>> snake;
 // Direction of the Snake
 Direction dir;
 
+// Global variable to ensure srand is called only once
+bool isRandomSeeded = false;
+
 ////////////////////////////////////////////////////////////////////////
 // Preliminary Functions
 // Setup Function
 void setup(){
-    srand(time(nullptr));
+    if (!isRandomSeeded) {
+        srand(time(nullptr));
+        isRandomSeeded = true;
+    }
     gameOver = false;
     score = 0;
     x = rand() % (bd_size - 2) + 1;
@@ -133,6 +139,15 @@ void set_walls(){
 
 // Update Snake Function
 void update_snake(){
+    // Remove the snake from the board
+    for (int i = 0; i < bd_size; i++) {
+        for (int j = 0; j < bd_size; j++) {
+            if (board[i][j] == 2) {
+                board[i][j] = 0;
+            }
+        }
+    }
+  // Update the board with snake's current position
   for(std::deque<std::pair<int, int>>::iterator it = snake.begin(); it != snake.end(); ++it) {
       int x = it->first;
       int y = it->second;
@@ -142,9 +157,15 @@ void update_snake(){
 
 // Generate Food Function
 void generate_food() {
+    // Ensure srand is called only once
+    if (!isRandomSeeded) {
+        srand(time(nullptr));
+        isRandomSeeded = true;
+    }
+
     bool foodPlaced = false;
 
-    while(!foodPlaced) {
+    while (!foodPlaced) {
         // Generate random position for food
         foodX = rand() % (bd_size - 2) + 1;
         foodY = rand() % (bd_size - 2) + 1;
@@ -153,15 +174,15 @@ void generate_food() {
         bool isValidPosition = true;
 
         // Check if the generated position is on the snake's body
-        for(std::deque<std::pair<int, int>>::iterator it = snake.begin(); it != snake.end(); ++it) {
-            if(it->first == foodX && it->second == foodY) {
+        for (const auto& part : snake) {
+            if (part.first == foodX && part.second == foodY) {
                 isValidPosition = false;
                 break;
             }
         }
 
         // If the position is valid and not on the walls, place the food there
-        if(isValidPosition && board[foodY][foodX] == 0) {
+        if (isValidPosition && board[foodY][foodX] == 0) {
             board[foodY][foodX] = 3;  // Set the food position on the board
             foodPlaced = true;
         }
@@ -222,12 +243,12 @@ void Logic(){
             break;
     }
 
-    // Check if the snake would go out of bounds
-    if(potentialX >= bd_size || potentialX < 0 || potentialY >= bd_size || potentialY < 0){
+    // Check if the potential position is a wall (value 1 in board)
+    if(board[potentialY][potentialX] == 1){
         gameOver = true;
     }
 
-    // Check if the snake would collide with its snake
+    // Check if the snake would collide with itself
     // We'll start from the second element to skip the head during the check
     for (auto it = snake.begin(); it != snake.end(); ++it) {
         if (it->first == potentialX && it->second == potentialY) {
@@ -295,8 +316,11 @@ class Layer {
         : inputSize(inputSize), outputSize(outputSize), activationFunction(activationFunction) {
       // Randomly initialize weights and biases
       weights.resize(outputSize, std::vector<double>(inputSize));
-      biases.resize(outputSize);
-      srand(time(nullptr));
+      biases.resize(outputSize);    
+      if (!isRandomSeeded) {
+        srand(time(nullptr));
+        isRandomSeeded = true;
+      }
       for (int i = 0; i < outputSize; ++i) {
         for (int j = 0; j < inputSize; ++j) {
           weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
@@ -369,12 +393,10 @@ int main(){
     setup();
     set_walls();
 
-    update_snake();
     generate_food();
 
     while(!gameOver){
       update_snake();
-      generate_food();
       Input();
       Logic();
       // sleep for 5 seconds
@@ -384,22 +406,8 @@ int main(){
    
     board_to_1D();
     EndGame();
+    system("clear");
     print_board_ended();
-    // Print the result
-    switch (dir) {
-        case UP:
-            std::cout << "Direction: UP" << std::endl;
-            break;
-        case DOWN:
-            std::cout << "Direction: DOWN" << std::endl;
-            break;
-        case LEFT:
-            std::cout << "Direction: LEFT" << std::endl;
-            break;
-        case RIGHT:
-            std::cout << "Direction: RIGHT" << std::endl;
-            break;
-    }
     return 0;
   }
   // AI Mode
