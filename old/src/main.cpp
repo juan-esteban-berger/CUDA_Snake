@@ -36,6 +36,7 @@ int main(){
 
     Setup();
     while(!gameOver){
+        clear();
         Draw();
         Input();
         Logic();

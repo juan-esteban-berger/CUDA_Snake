@@ -9,6 +9,7 @@
 #include <functional>
 #include <cmath>
 #include <cstdlib>
+#include <unistd.h>
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -50,20 +51,51 @@ int rewards[round_actions] = {0};
 // Deque to store the Snake
 std::deque<std::pair<int, int>> snake;
 
+// Direction of the Snake
+Direction dir;
+
 ////////////////////////////////////////////////////////////////////////
 // Preliminary Functions
 // Setup Function
 void setup(){
+    srand(time(nullptr));
     gameOver = false;
     score = 0;
     x = rand() % (bd_size - 2) + 1;
     y = rand() % (bd_size - 2) + 1;
+    int randomNum = rand() % 4;
+    dir = static_cast<Direction>(randomNum);
     snake.clear();
     snake.push_back({x, y});
-    // GenerateFood();
 }
-// Print Board Function
-void print_board(){
+
+// Print board during game
+void print_board() {
+    clear();  // Clear the screen
+
+    for (int i = 0; i < bd_size; i++) {
+        for (int j = 0; j < bd_size; j++) {
+            if (board[i][j] == 0) {
+                mvprintw(i, j*2, "  ");
+            } else if (board[i][j] == 1) {
+                mvprintw(i, j*2, "#");
+            } else if (board[i][j] == 2) {
+                mvprintw(i, j*2, "O");
+            } else if (board[i][j] == 3) {
+                mvprintw(i, j*2, "F");
+            } else {
+                mvprintw(i, j*2, "E");
+            }
+        }
+    }
+
+    mvprintw(bd_size, 0, "Score: %d", score);
+    refresh();  // Refresh the screen
+}
+
+// Print Board Function outside of ncurses mode once game
+// has ended
+void print_board_ended(){
   for (int i=0; i < bd_size; i++){
     for (int j=0; j < bd_size; j++){
       if (board[i][j] == 0){
@@ -136,6 +168,90 @@ void generate_food() {
     }
 }
 
+// Input Function
+void Input(){
+    int ch;
+    ch = getch();
+    switch(ch){
+        case 'w':
+            if(dir != DOWN || snake.size() == 1)  // If moving UP, prevent moving DOWN if there's a snake
+                dir = UP;
+            break;
+        case 'a':
+            if(dir != RIGHT || snake.size() == 1)  // If moving LEFT, prevent moving RIGHT if there's a snake
+                dir = LEFT;
+            break;
+        case 's':
+            if(dir != UP || snake.size() == 1)  // If moving DOWN, prevent moving UP if there's a snake
+                dir = DOWN;
+            break;
+        case 'd':
+            if(dir != LEFT || snake.size() == 1)  // If moving RIGHT, prevent moving LEFT if there's a snake
+                dir = RIGHT;
+            break;
+        default:
+            break;
+    }
+    refresh();
+}
+
+// Logic Function
+void Logic(){
+    int prevX = x;  // Store the previous x before updating
+    int prevY = y;
+
+    // Potential new positions
+    int potentialX = x;
+    int potentialY = y;
+
+    // Adjusting direction of the snake's head based on input
+    switch(dir){
+        case UP:
+            potentialY--;
+            break;
+        case LEFT:
+            potentialX--;
+            break;
+        case DOWN:
+            potentialY++;
+            break;
+        case RIGHT:
+            potentialX++;
+            break;
+        default:
+            break;
+    }
+
+    // Check if the snake would go out of bounds
+    if(potentialX >= bd_size || potentialX < 0 || potentialY >= bd_size || potentialY < 0){
+        gameOver = true;
+    }
+
+    // Check if the snake would collide with its snake
+    // We'll start from the second element to skip the head during the check
+    for (auto it = snake.begin(); it != snake.end(); ++it) {
+        if (it->first == potentialX && it->second == potentialY) {
+            gameOver = true;
+            break;
+        }
+    }
+
+    // Only update the positions if the game isn't over
+    if (!gameOver) {
+        x = potentialX;
+        y = potentialY;
+        snake.push_front({x, y});   // Add new head position to the front of the snake
+        snake.pop_back();           // Remove last segment of the snake
+
+        // Check if the snake has eaten the food
+        if (x == foodX && y == foodY) {
+            score++;
+            generate_food(); // Corrected from GenerateFood
+            snake.push_back({prevX, prevY});  // Add a new segment to the snake
+        }
+    }
+}
+
 // Board to 1D-Array Function
 void board_to_1D(){
   for(int i = 0; i < bd_size; i++){
@@ -143,6 +259,11 @@ void board_to_1D(){
       board1D[i*bd_size + j] = board[i][j];
     }
   }
+}
+
+// End Game Function
+void EndGame() {
+    endwin();// End ncurses mode
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -175,6 +296,7 @@ class Layer {
       // Randomly initialize weights and biases
       weights.resize(outputSize, std::vector<double>(inputSize));
       biases.resize(outputSize);
+      srand(time(nullptr));
       for (int i = 0; i < outputSize; ++i) {
         for (int j = 0; j < inputSize; ++j) {
           weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
@@ -222,9 +344,6 @@ int main(){
   int choice;
   int sleep_time;
 
-  // Seed random number generator
-  srand(time(nullptr));
-
   // Set sleep time
   sleep_time = 160000;
 
@@ -240,22 +359,47 @@ int main(){
 
   // Normal Mode
   if (choice == 1){
-    set_walls();
+    initscr();
+    cbreak();
+    keypad(stdscr, TRUE);
+    noecho();
+    curs_set(0);
+    nodelay(stdscr, TRUE);
 
-    snake.push_back({2,3});
-    snake.push_back({2,4});
-    snake.push_back({2,5});
-    snake.push_back({2,6});
-    snake.push_back({2,7});
+    setup();
+    set_walls();
 
     update_snake();
     generate_food();
 
-    print_board();
-    std::cout << std::endl;
+    while(!gameOver){
+      update_snake();
+      generate_food();
+      Input();
+      Logic();
+      // sleep for 5 seconds
+      print_board();
+      usleep(sleep_time);
+    }
    
     board_to_1D();
-
+    EndGame();
+    print_board_ended();
+    // Print the result
+    switch (dir) {
+        case UP:
+            std::cout << "Direction: UP" << std::endl;
+            break;
+        case DOWN:
+            std::cout << "Direction: DOWN" << std::endl;
+            break;
+        case LEFT:
+            std::cout << "Direction: LEFT" << std::endl;
+            break;
+        case RIGHT:
+            std::cout << "Direction: RIGHT" << std::endl;
+            break;
+    }
     return 0;
   }
   // AI Mode
