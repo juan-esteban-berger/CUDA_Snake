@@ -216,6 +216,34 @@ void Input(){
     refresh();
 }
 
+// AI Input Function
+void AI_Input(const std::vector<double>& output) {
+    // Find the index of the maximum value in output
+    int maxIndex = 0;
+    double maxValue = output[0];
+    for (int i = 1; i < output.size(); ++i) {
+        if (output[i] > maxValue) {
+            maxValue = output[i];
+            maxIndex = i;
+        }
+    }
+
+    // Map the index to a direction
+    Direction newDir;
+    if (maxIndex == 0) newDir = UP;
+    else if (maxIndex == 1) newDir = DOWN;
+    else if (maxIndex == 2) newDir = LEFT;
+    else if (maxIndex == 3) newDir = RIGHT;
+
+    // Update dir based on newDir, taking into account the current direction to prevent snake moving into itself
+    if (newDir == UP && dir != DOWN) dir = UP;
+    else if (newDir == DOWN && dir != UP) dir = DOWN;
+    else if (newDir == LEFT && dir != RIGHT) dir = LEFT;
+    else if (newDir == RIGHT && dir != LEFT) dir = RIGHT;
+
+    refresh();
+}
+
 // Logic Function
 void Logic(){
     int prevX = x;  // Store the previous x before updating
@@ -306,54 +334,123 @@ double relu_derivative(double x){
 
 class Layer {
   public:
-    std::vector<std::vector<double>> weights;
-    std::vector<double> biases;
-    std::vector<double> outputs;
-    int inputSize, outputSize;
-    std::function<double(double)> activationFunction;
-
+    // Initialize weights, biases, and other parameters
+    std::vector<std::vector<double>> weights; // 2D vector to store the weights
+    std::vector<double> biases; // 1D vector to store the biases
+    std::vector<double> outputs; // 1D vector to store the outputs
+    int inputSize, outputSize; // Integers to store the input and output sizes
+    std::function<double(double)> activationFunction; // Activation function
+    std::vector<std::vector<double>> dweights; // 2D vector to store the derivatives of
+                                               // of the weights with respect to the loss
+    std::vector<double> dbiases; // 1D vector to store the derivatives of the biases
+                                 // with respect to the loss
+    std::vector<double> dinputs; // 1D vector to store the derivatives of the inputs
+                                 // with respect to the loss
+    // Constructor
     Layer(int inputSize, int outputSize, std::function<double(double)> activationFunction)
         : inputSize(inputSize), outputSize(outputSize), activationFunction(activationFunction) {
-      // Randomly initialize weights and biases
+      // Resize the weights matrix to have 'outputSize' rows and 'inputSize' columns
       weights.resize(outputSize, std::vector<double>(inputSize));
-      biases.resize(outputSize);    
+      // Resize the biases vector to have 'outputSize' elements
+      biases.resize(outputSize);
+      // Ensure srand is called only once
       if (!isRandomSeeded) {
         srand(time(nullptr));
         isRandomSeeded = true;
       }
+      // Initialize the weights and biases with random values
       for (int i = 0; i < outputSize; ++i) {
         for (int j = 0; j < inputSize; ++j) {
+          // Random number between -0.5 and 0.5
           weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
         }
+        // Random number between -0.5 and 0.5
         biases[i] = static_cast<double>(rand()) / RAND_MAX - 0.5;
       }
     }
 
+    // Forward Pass Function
     std::vector<double> forward(const std::vector<double>& input) {
+      // Resize the outputs vector to be the same as outputSize
       outputs.resize(outputSize);
+      // Each value in the outputs vector should be the sum of
+      // the each input and its corresponding weight, plus the bias
       for (int i = 0; i < outputSize; ++i) {
+        // Initialize the output to zero
         outputs[i] = 0;
+        // Iterate throught the inputs
         for (int j = 0; j < inputSize; ++j) {
+          // Sum the weighted input
           outputs[i] += input[j] * weights[i][j];
         }
+        // Add the bias
         outputs[i] += biases[i];
+        // Pass through the activation function
         outputs[i] = activationFunction(outputs[i]);
       }
       return outputs;
     }
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+    // Backward Pass Function
+    std::vector<double> backward(const std::vector<double>& doutputs){
+      // Resize dweights to be a 2D vector of 'outputSize' rows and 'inputSize' columns
+      dweights.resize(outputSize, std::vector<double>(inputSize));
+      // Resize dbiases to have 'outputSize' elements
+      dbiases.resize(outputSize);
+      // Resize dinputs to have 'inputSize' elements
+      dinputs.resize(inputSize);
+
+      for (int i = 0; i < outputSize; ++i){ // Increment i before the current iteration
+        dbiases[i] = doutputs[i];
+
+        for (int j = 0; j < inputSize; ++j) // Increment j before the current iteration
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+
+      }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 // Neural Network Class
 class NeuralNetwork{
   public:
+    // Vector to store the layers of the neural network.
     std::vector<Layer> layers;
-        void addLayer(int inputSize, int outputSize, std::function<double(double)> activationFunction) {
+    // Function to add a layer to the Neural Network
+    void addLayer(int inputSize, int outputSize, std::function<double(double)> activationFunction) {
+        // Use emplace_back instead of push_back in order to constructs an object in-place at the end of the container, rather than adding a copy of an existing object to the end of a container.
         layers.emplace_back(inputSize, outputSize, activationFunction);
     }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+    // Function to train the Neural Network
+    void train(const std::vector<std::vector<<double>>& inputs, const std::vector<double>>& targets, double learningRate, int epochs){
+      for (int epoch = 0; epoch < epochs; ++epoch) // Increment epoch before the current iteration
+        double totalError = 0;
+
+        for (size_t i = 0; i < input.size(); i++){
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////`
+    // Function to use the Neural Networks to make predictions
     std::vector<double> predict(const std::vector<double>& input) {
+        // Initialize a vector to store the current output that starts
+        // by being equal to the input
         std::vector<double> currentOutput = input;
+        // Iterate through each layer in the neural network
         for (Layer& layer : layers) {
+            // Update the current output by calling the forward function
             currentOutput = layer.forward(currentOutput);
         }
         return currentOutput;
@@ -388,8 +485,7 @@ int main(){
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
-    nodelay(stdscr, TRUE);
-
+    nodelay(stdscr, TRUE); // Comment this out for debugging
     setup();
     set_walls();
 
@@ -402,6 +498,11 @@ int main(){
       // sleep for 5 seconds
       print_board();
       usleep(sleep_time);
+      // ////////////////////////////////////////
+      // printw("Press any key to continue...");
+      // refresh();
+      // getch(); ; // Wait for user input;
+      // //////////////////////////////////////
     }
    
     board_to_1D();
@@ -410,8 +511,10 @@ int main(){
     print_board_ended();
     return 0;
   }
-  // AI Mode
+
+  // AI Moide
   else if (choice == 2){
+    // Print menu for choosing a model
     system("clear");
     std::cout << "Please select a model: " << std::endl;
     std::cout << "placeholder_model.csv" << std::endl;
@@ -421,53 +524,114 @@ int main(){
     std::cout << "Enter your choice: ";
     std::cin >> choice;
 
+    // Clear the screen for the game
     system("clear");
 
-//////////////////////////////////////////////////////////////////////
-  NeuralNetwork nn;
-  nn.addLayer(1604, 800, relu);
-  nn.addLayer(800, 400, relu);
-  nn.addLayer(200, 4, relu);
+    //////////////////////////////////////////////
+    // Initialize the neural network
+    srand(time(nullptr));
 
+    NeuralNetwork nn;
+    nn.addLayer(1610, 800, relu);
+    nn.addLayer(800, 400, relu);
+    nn.addLayer(400, 4, relu);
+    //////////////////////////////////////////////
 
-  std::vector<double> input = {1.0, 0.5, -1.5};
-  std::cout << "Input: ";
-  int count = 0;
-  for (double value : input) {
-      std::cout << value << " ";
-      if (count == 3) {  // This condition will be true after printing the fourth element
-          break;
-      }
-      count++;
-  }
-  std::cout << "\n";
-  std::vector<double> output = nn.predict(input);
+    // Initialize ncurses mode
+    initscr();
+    cbreak();
+    keypad(stdscr, TRUE);
+    noecho();
+    curs_set(0);
 
-  std::cout << "Predictions: ";
-  for (double value : output) {
-      std::cout << value << " ";
-   }
-  std::cout << "\n";
-
-//////////////////////////////////////////////////////////////////////
-
+    // Setup the game
+    setup();
     set_walls();
-
-    snake.push_back({2,3});
-    snake.push_back({2,4});
-    snake.push_back({2,5});
-    snake.push_back({2,6});
-    snake.push_back({2,7});
-
-    update_snake();
     generate_food();
 
-    print_board();
+    // Create input and output vectors
+    std::vector<double> input(1610);
+    std::vector<double> output;
+
+    // Main game loop
+    while(!gameOver){
+
+//////////////////////////////////////////////////////////////
+// Randomly initialize an input of length 1610
+for (double& value : input) {
+    value = static_cast<double>(rand()) / RAND_MAX - 0.5;
+}
+
+// Get the predictions
+output = nn.predict(input);
+//////////////////////////////////////////////////////////////
+
+      // Print Board and sleep
+      update_snake();
+      print_board();
+
+      // Print input
+      printw("\n");
+      printw("Input: ");
+      int count = 0;
+      for (double value : input) {
+          printw("%.2f ", value);
+          // Only print first 4 elements
+          if (count == 3) {
+              break;
+          }
+          count++;
+      }
+      printw("...\n");
+
+      // Print output
+      printw("Predictions: ");
+      for (double value : output) {
+          printw("%.2f ", value);
+      }
+      printw("\n");
+
+      // Move the snake based on the predictions
+      AI_Input(output);
+      Logic();
+
+      // Generate and store features
+      // board_to_1D();
+
+      // Sleep
+      usleep(sleep_time);
+    }
+
+    // End the game and ncurses mode
+    EndGame();
+
+    // Print the board (without n curses mode)
+    system("clear");
+    print_board_ended();
+
+
+    // Print input (without ncurses mode)
+    std::cout << "Input: ";
+    int count = 0;
+    for (double value : input) {
+        std::printf("%.2f ", value);
+        if (count == 3) {  // This condition will be true after printing the fourth element
+            break;
+        }
+        count++;
+    }
+    std::cout << "...\n";
+
+    // Print output (without ncurses mode)
+    std::cout << "Predictions: ";
+    for (double value : output) {
+        std::printf("%.2f ", value);
+    }
     std::cout << std::endl;
-   
-    board_to_1D();
+
     return 0;
   }
+
   // Train AI Model
   else if (choice == 3){
     set_walls();
@@ -487,10 +651,12 @@ int main(){
     board_to_1D();
     return 0;
   }
+
   // Exit
   else if (choice == 4){
     return 0;
   }
+
   // Invalid choice
   else{
     std::cout << "Invalid choice" << std::endl;
