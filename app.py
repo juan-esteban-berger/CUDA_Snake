@@ -1,69 +1,113 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <deque>
-#include <random>
-#include <ctime>
-#include <ncurses.h>
-#include <vector>
-#include <functional>
-#include <cmath>
-#include <cstdlib>
-#include <unistd.h>
+import streamlit as st
+
+st.title('Deep Reinforcement Learning Snake Game with CUDA and C++')
+
+st.markdown('## Introduction')
+
+# st.markdown("## Overhead")
+#
+# st.code('''
+# #include <iostream>
+# #include <fstream>
+# #include <sstream>
+# #include <deque>
+# #include <random>
+# #include <ctime>
+# #include <ncurses.h>
+# #include <vector>
+# #include <functional>
+# #include <cmath>
+# #include <cstdlib>
+# #include <unistd.h>
+# ''',
+# language='cpp'
+# )
 
 
-////////////////////////////////////////////////////////////////////////
+st.markdown('## Coding the Snake Game')
+
+# st.markdown("### Variable Definitions")
+
+st.code('''
 // Variable Definitions
 bool gameOver;
-
 // Enum for Direction
 enum Direction { UP, DOWN, LEFT, RIGHT };
-
 // Ints for generating the snake's position
 int x, y;
-
 // Ints for generating the food's position
 int foodX, foodY;
-
 // Int for storing the score
 int score;
-
 // Generate Board
 const int bd_size = 20;
 int board[bd_size][bd_size] = {0};
-
 // Create 1D-Array for Board
 const int bd_area = bd_size * bd_size;
 int board1D[bd_area] = {0};
-
 // Create variable for number of actions before retraining
 const int round_actions = 1000;
-
-// // 1D-Array to store the Board States
-// int board_states[round_actions] = {0};
-//
-// // 1D-Array to store the Actions Taken
-// int actions[round_actions] = {0};
-//
-// // 1D-Aray to store the Rewards
-// int rewards[round_actions] = {0};
-
+// 1D-Array to store the Board States
+int board_states[round_actions] = {0};
+// 1D-Array to store the Actions Taken
+int actions[round_actions] = {0};
+// 1D-Aray to store the Rewards
+int rewards[round_actions] = {0};
 // Deque to store the Snake
 std::deque<std::pair<int, int>> snake;
-
 // Direction of the Snake
 Direction dir;
-
 // Global variable to ensure srand is called only once
 bool isRandomSeeded = false;
+''',
+language='cpp'
+)
 
-// Global variable for checking if the snake has eaten food
-bool hasEatenFood;
+st.markdown("### Setup Function")
 
-// Global variables for features and rewards
-std::vector<double> features;
-std::vector<double> rewards;
+st.markdown("### Printing the Board in ncurses Mode")
 
+st.markdown("### Printing the Board outside of ncurses Mode")
+
+st.markdown("### Setting the Walls")
+
+st.markdown("### Updating the Snake")
+
+st.markdown("### Generating Food")
+
+st.markdown("### Input Function for Normal Mode")
+
+st.markdown("### Input Function for AI Mode")
+
+st.markdown("### Implementing the Game's Logic")
+
+st.markdown("### End Game Function")
+
+st.markdown("## Implementing Deep Reinforcement Learning with CUDA and C++")
+
+st.markdown('### Layer Class')
+
+st.markdown('### Neural Network Class')
+
+st.markdown('### Relu Function and its Derivative')
+
+st.markdown('## Normal Mode')
+
+st.markdown('## AI Mode')
+
+st.markdown('## Training Mode')
+
+st.markdown('## Main Function')
+
+st.markdown('## Final File Structure')
+
+st.markdown('## Makefile')
+
+st.markdown('## Resources Used')
+
+
+
+st.code('''
 ////////////////////////////////////////////////////////////////////////
 // Preliminary Functions
 // Setup Function
@@ -103,52 +147,35 @@ void print_board() {
     }
 
     mvprintw(bd_size, 0, "Score: %d", score);
-    mvprintw(bd_size + 1, 0, "Features: ");
-    for (int i = 0; i < 4 && i < features.size(); i++) {
-        mvprintw(bd_size + 1, 11 + i * 6, "%1.1f ", features[i]);
-    }
-    mvprintw(bd_size + 1, 35, "... ");
-
-    // Print the rewards for each action
-    mvprintw(bd_size + 2, 0, "Rewards: U:%1.1f R:%1.1f D:%1.1f L:%1.1f", 
-             rewards[0], rewards[1], rewards[2], rewards[3]);
-
     refresh();  // Refresh the screen
 }
 
-// Print Board Function outside of ncurses mode once game has ended
+// Print Board Function outside of ncurses mode once game
+// has ended
 void print_board_ended(){
   for (int i=0; i < bd_size; i++){
     for (int j=0; j < bd_size; j++){
       if (board[i][j] == 0){
         std::cout << "  ";
-      } else if (board[i][j] == 1){
+      }
+      else if (board[i][j] == 1){
         std::cout << "# ";
-      } else if (board[i][j] == 2){
+      }
+      else if (board[i][j] == 2){
         std::cout << "O ";
-      } else if (board[i][j] == 3){
+      }
+      else if (board[i][j] == 3){
         std::cout << "F ";
-      } else {
+      }
+      else{
         std::cout << "E ";
       }
     }
     std::cout << std::endl;
   }
-  std::cout << "Score: " << score << std::endl;
-
-  // Print the first four features
-  std::cout << "Features: ";
-  for (int i = 0; i < 4 && i < features.size(); i++) {
-      std::cout << features[i] << " ";
-  }
-  std::cout << "... " << std::endl;
-
-  // Print the rewards for each action
-  std::cout << "Rewards: U:" << rewards[0] 
-            << " R:" << rewards[1] 
-            << " D:" << rewards[2] 
-            << " L:" << rewards[3] << std::endl;
+  std::cout << "Score: " << score << "\n";
 }
+
 // Set Wall Function
 void set_walls(){
   int count = 0;
@@ -269,7 +296,7 @@ void AI_Input(const std::vector<double>& output) {
 }
 
 // Logic Function
-bool Logic(){
+void Logic(){
     int prevX = x;  // Store the previous x before updating
     int prevY = y;
 
@@ -309,9 +336,6 @@ bool Logic(){
         }
     }
 
-    // Bool to check if the snake has eaten food
-    bool hasEatenFood = false;
-
     // Only update the positions if the game isn't over
     if (!gameOver) {
         x = potentialX;
@@ -324,118 +348,17 @@ bool Logic(){
             score++;
             generate_food(); // Corrected from GenerateFood
             snake.push_back({prevX, prevY});  // Add a new segment to the snake
-            // Set hasEatenFood to true
-            hasEatenFood = true;
         }
     }
-
-    return hasEatenFood;
-
 }
 
-// Function to generate a vector with the features for deep reinforcement learning
-std::vector<double> get_features(){
-    // The total number of features is 11 (initial features) + bd_size * bd_size (board state)
-    std::vector<double> features(11 + bd_size * bd_size, 0.0);
-
-    // Get the head of the snake
-    int headX = snake.front().first;
-    int headY = snake.front().second;
-
-    // Check if there is a wall or snake body in front of the snake
-    if (dir == UP && (board[headY - 1][headX] == 1 || board[headY - 1][headX] == 2)) {
-        features[0] = 1.0;
-    } else {
-        features[0] = 0.0;
+// Board to 1D-Array Function
+void board_to_1D(){
+  for(int i = 0; i < bd_size; i++){
+    for(int j = 0; j < bd_size; j++){
+      board1D[i*bd_size + j] = board[i][j];
     }
-    // Check if there is a wall or snake body behind the snake
-    if (dir == DOWN && (board[headY + 1][headX] == 1 || board[headY + 1][headX] == 2)) {
-        features[1] = 1.0;
-    } else {
-        features[1] = 0.0;
-    }
-    // Check if there is a wall or snake body to the left of the snake
-    if (dir == LEFT && (board[headY][headX - 1] == 1 || board[headY][headX - 1] == 2)) {
-        features[2] = 1.0;
-    } else {
-        features[2] = 0.0;
-    }
-    // Check if there is a wall or snake body to the right of the snake
-    if (dir == RIGHT && (board[headY][headX + 1] == 1 || board[headY][headX + 1] == 2)) {
-        features[3] = 1.0;
-    } else {
-        features[3] = 0.0;
-    }
-
-    // Check if the food is above the snake
-    if (foodY < headY) {
-        features[4] = 1.0;
-    } else {
-        features[4] = 0.0;
-    }
-    // Check if the food is below the snake
-    if (foodY > headY) {
-        features[5] = 1.0;
-    } else {
-        features[5] = 0.0;
-    }
-    // Check if the food is to the left of the snake
-    if (foodX < headX) {
-        features[6] = 1.0;
-    } else {
-        features[6] = 0.0;
-    }
-    // Check if the food is to the right of the snake
-    if (foodX > headX) {
-        features[7] = 1.0;
-    } else {
-        features[7] = 0.0;
-    }
-
-    // Check if the current direction is UP
-    if (dir == UP) {
-        features[8] = 1.0;
-    } else {
-        features[8] = 0.0;
-    }
-    // Check if the current direction is DOWN
-    if (dir == DOWN) {
-        features[9] = 1.0;
-    } else {
-        features[9] = 0.0;
-    }
-    // Check if the current direction is LEFT
-    if (dir == LEFT) {
-        features[10] = 1.0;
-    } else {
-        features[10] = 0.0;
-    }
-    // Check if the current direction is RIGHT
-    if (dir == RIGHT) {
-        features[11] = 1.0;
-    } else {
-        features[11] = 0.0;
-    }
-
-    // Flatten the board into a 1D vector and append it to features.
-    // Start from index 11 since that's where the board state should begin.
-    for (int i = 0; i < bd_size; i++) {
-        for (int j = 0; j < bd_size; j++) {
-            features[11 + i * bd_size + j] = static_cast<double>(board[i][j]);
-        }
-    }
-
-    return features;
-}
-
-// Function to generate_outputs using a specified reward function
-std::vector<double> get_rewards(bool gameOver, bool hasEatenFood, int currentScore){
-
-  // Initialize a vector to store the rewards
-  // Starting with a small negative reward for all actions
-  std::vector<double> rewards(4, -0.1);
-
-  return rewards;
+  }
 }
 
 // End Game Function
@@ -475,14 +398,8 @@ class Layer {
     std::vector<double> dinputs; // 1D vector to store the derivatives of the inputs
                                  // with respect to the loss
     // Constructor
-    Layer(
-        int inputSize,
-        int outputSize,
-        std::function<double(double)> activationFunction
-        ): inputSize(inputSize), 
-           outputSize(outputSize),
-           activationFunction(activationFunction) {
-
+    Layer(int inputSize, int outputSize, std::function<double(double)> activationFunction)
+        : inputSize(inputSize), outputSize(outputSize), activationFunction(activationFunction) {
       // Resize the weights matrix to have 'outputSize' rows and 'inputSize' columns
       weights.resize(outputSize, std::vector<double>(inputSize));
       // Resize the biases vector to have 'outputSize' elements
@@ -525,43 +442,30 @@ class Layer {
       return outputs;
     }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
     // Backward Pass Function
-    std::vector<double> backward(
-        const std::vector<double>& doutputs,
-        const std::vector<double>& inputs) {
-
-      // Resize dweights to match the dimensions of the
-      // weights matrix in the current layer
+    std::vector<double> backward(const std::vector<double>& doutputs){
+      // Resize dweights to be a 2D vector of 'outputSize' rows and 'inputSize' columns
       dweights.resize(outputSize, std::vector<double>(inputSize));
-      // Reisze dbiases to match the dimensions of the
-      // biases vector in the current layer
+      // Resize dbiases to have 'outputSize' elements
       dbiases.resize(outputSize);
-      // Resize dinputs to match the dimensions of the
-      // inputs vector in the current layer
-      // Initialize all the values to 0.0
-      dinputs.resize(inputSize, 0.0);
+      // Resize dinputs to have 'inputSize' elements
+      dinputs.resize(inputSize);
 
-      // Iterate once for each output
-      for (int i = 0; i <outputSize; i++){
-        // The derivative of the loss with respect to the bias
-        // is equal to the derivative of the output with respect
+      for (int i = 0; i < outputSize; ++i){ // Increment i before the current iteration
         dbiases[i] = doutputs[i];
 
-        // Iterate once for each input
-        for (int j = 0; j < inputSize; j++){
-          // Use the chain rule to calculate the derivative of the loss
-          // with respect to the weight
-          dweights[i][j] = inputs[j] * doutputs[i];
-          // Use the chain rule to calculate the derivative of the loss
-          // with respect to the input
-          dinputs[j] += weights[i][j] * doutputs[i];
-        }
+        for (int j = 0; j < inputSize; ++j) // Increment j before the current iteration
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+        // This is where I LEFT off
+
       }
-
-      return dinputs;
-
     }
-
+/////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 // Neural Network Class
@@ -569,99 +473,27 @@ class NeuralNetwork{
   public:
     // Vector to store the layers of the neural network.
     std::vector<Layer> layers;
-
     // Function to add a layer to the Neural Network
-    void addLayer(
-        int inputSize, 
-        int outputSize,
-        std::function<double(double)> activationFunction) {
+    void addLayer(int inputSize, int outputSize, std::function<double(double)> activationFunction) {
         // Use emplace_back instead of push_back in order to constructs an object in-place at the end of the container, rather than adding a copy of an existing object to the end of a container.
         layers.emplace_back(inputSize, outputSize, activationFunction);
     }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
     // Function to train the Neural Network
-    void train(
-        std::vector<std::vector<double>> inputs,
-        std::vector<std::vector<double>> targets,
-        double learningRate,
-        int epochs){
-          // Iterate once through each epoch
-          for (int epoch = 0; epoch < epochs; epoch++) {
-            // Double to store the total error for this epoch
-            double totalError = 0;
+    void train(const std::vector<std::vector<<double>>& inputs, const std::vector<double>>& targets, double learningRate, int epochs){
+      for (int epoch = 0; epoch < epochs; ++epoch) // Increment epoch before the current iteration
+        double totalError = 0;
 
-            // Loop through all the training examples
-            for (size_t i = 0; i < inputs.size(); i++){
-             
-              // Vector to store the current input
-              std::vector<double> input = inputs[i];
-              // Vector to store the original inputs for each layer
-              // (for use in the backward pass)
-              std::vector<std::vector<double>> layerInputs;
-
-              // Loop throuch each layer in the Network
-              // performing a forward pass in each iteration
-              for (Layer& layer : layers){
-                // Store the original input for use in the backward pass
-                layerInputs.push_back(input);
-                // Perform a forward pass
-                input = layer.forward(input);
-              }
-
-              // Create a new vector to store the output
-              // which is currently stored in input
-              std::vector<double> output = input;
-              // Create a new vector to store the derivative of the loss
-              // with respect to the output of the last layer
-              std::vector<double> dLoss_dOutput(output.size());
-              // Double to store the loss
-              double loss = 0.0;
-
-              // Iterate through each element in the output
-              for (size_t j = 0; j < output.size(); j++){
-                // Calculate the error
-                double error = output[j] - targets[i][j];
-                // Add the error to the loss
-                loss += error * error;
-                // Calculate the derivative of the loss with respect to the output
-                // This is the derivative of the Mean Squared Error
-                // dLoss_dOutput[j] = 2 * output[j] - targets[i][j] / output.size();
-                dLoss_dOutput[j] = 2 * error / output.size();
-              }
-
-              // Add the loss to the total error
-              totalError += loss / output.size();
-
-              // Vector to store the derivative of the output
-              // with respect to the input of the last layer
-              std::vector<double> dOutput = dLoss_dOutput;
-
-              // Loop through each layer in the network in reverse
-              for (int j = layers.size() - 1; j >= 0; --j){
-                // Perform a backward pass
-                dOutput = layers[j].backward(dOutput, layerInputs[j]);
-              }
-
-              // Loop through each layer
-              for (Layer& layer : layers){
-                // Loop through each weight in the layer
-                for (size_t k = 0; k < layer.weights.size(); ++k){
-                  for (size_t l = 0; l < layer.weights[k].size(); ++l){
-                    // Update the weight
-                    layer.weights[k][l] -= learningRate * layer.dweights[k][l];
-                  }
-                  // Update the bias
-                  layer.biases[k] -= learningRate * layer.dbiases[k];
-                }
-              }
-
-            }
-
-            // Print the average error for this dataset
-            std::cout << "Epoch " << epoch + 1 << " / " << epochs << ", Error: " << totalError / inputs.size() << std::endl;
-          }
+        for (size_t i = 0; i < input.size(); i++){
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+          // This is where I LEFT off
+        }
     }
-
+/////////////////////////////////////////////////////////////////////////////////////////////`
     // Function to use the Neural Networks to make predictions
     std::vector<double> predict(const std::vector<double>& input) {
         // Initialize a vector to store the current output that starts
@@ -713,29 +545,20 @@ int main(){
     while(!gameOver){
       update_snake();
       Input();
-      hasEatenFood = Logic();
-
-      // Get Features
-      features = get_features();
-      // Get Rewards
-      rewards = get_rewards(gameOver, hasEatenFood, score);
-
+      Logic();
+      // sleep for 5 seconds
       print_board();
-
-      // Sleep 
       usleep(sleep_time);
-
-      
+      // ////////////////////////////////////////
+      // printw("Press any key to continue...");
+      // refresh();
+      // getch(); ; // Wait for user input;
+      // //////////////////////////////////////
     }
    
+    board_to_1D();
     EndGame();
     system("clear");
-
-    // Get Features
-    features = get_features();
-    // Get Rewards
-    rewards = get_rewards(gameOver, hasEatenFood, score);
-
     print_board_ended();
     return 0;
   }
@@ -796,12 +619,6 @@ output = nn.predict(input);
 
       // Print Board and sleep
       update_snake();
-      
-      // Get Features
-      features = get_features();
-      // Get Rewards
-      rewards = get_rewards(gameOver, hasEatenFood, score);
-
       print_board();
 
       // Print input
@@ -827,9 +644,10 @@ output = nn.predict(input);
 
       // Move the snake based on the predictions
       AI_Input(output);
-      hasEatenFood = Logic();
+      Logic();
 
       // Generate and store features
+      // board_to_1D();
 
       // Sleep
       usleep(sleep_time);
@@ -840,12 +658,6 @@ output = nn.predict(input);
 
     // Print the board (without n curses mode)
     system("clear");
-
-    // Get Features
-    features = get_features();
-    // Get Rewards
-    rewards = get_rewards(gameOver, hasEatenFood, score);
-
     print_board_ended();
 
 
@@ -887,6 +699,7 @@ output = nn.predict(input);
     print_board();
     std::cout << std::endl;
    
+    board_to_1D();
     return 0;
   }
 
@@ -901,3 +714,6 @@ output = nn.predict(input);
     return 0;
   }
 }
+''',
+language='cpp'
+)
