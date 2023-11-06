@@ -6,6 +6,7 @@
 #include <ctime>
 #include <ncurses.h>
 #include <vector>
+#include <cstring>
 #include <functional>
 #include <cmath>
 #include <cstdlib>
@@ -32,21 +33,8 @@ int score;
 const int bd_size = 20;
 int board[bd_size][bd_size] = {0};
 
-// Create 1D-Array for Board
-const int bd_area = bd_size * bd_size;
-int board1D[bd_area] = {0};
-
 // Create variable for number of actions before retraining
 const int round_actions = 1000;
-
-// // 1D-Array to store the Board States
-// int board_states[round_actions] = {0};
-//
-// // 1D-Array to store the Actions Taken
-// int actions[round_actions] = {0};
-//
-// // 1D-Aray to store the Rewards
-// int rewards[round_actions] = {0};
 
 // Deque to store the Snake
 std::deque<std::pair<int, int>> snake;
@@ -60,9 +48,13 @@ bool isRandomSeeded = false;
 // Global variable for checking if the snake has eaten food
 bool hasEatenFood;
 
-// Global variables for features and rewards
+// Global variables for features, rewards, and q-values
 std::vector<double> features;
-std::vector<double> rewards;
+std::vector<double> current_features;
+std::vector<double> next_features;
+double reward = 0.0;
+std::vector<double> current_q_values;
+std::vector<double> next_q_values;
 
 ////////////////////////////////////////////////////////////////////////
 // Preliminary Functions
@@ -102,18 +94,28 @@ void print_board() {
         }
     }
 
+    // Print "Score"
     mvprintw(bd_size, 0, "Score: %d", score);
-    mvprintw(bd_size + 1, 0, "Features: ");
-    for (int i = 0; i < 4 && i < features.size(); i++) {
-        mvprintw(bd_size + 1, 11 + i * 6, "%1.1f ", features[i]);
+
+    // Print "Reward"
+    mvprintw(bd_size + 1, 0, "Reward: %1.2f", reward);  // Printing the reward
+
+    // Printing features at the end, 20 per line
+    int feature_line = bd_size + 2; // Start printing features at this line
+    mvprintw(feature_line, 0, "Features:"); // Print "Features:"
+    feature_line++; // Move to the next line to start printing features
+
+    int offset = 0; // Starting offset for features printing (no initial offset for the first line of features)
+    for (int i = 0; i < features.size(); i++) {
+        if (i > 0 && i % 20 == 0) {
+            feature_line++; // Move to the next line after printing 20 features
+            offset = 0; // Reset offset for the new line
+        }
+        mvprintw(feature_line, offset, "%d ", static_cast<int>(features[i]));
+        offset += 2 + strlen(std::to_string(static_cast<int>(features[i])).c_str()) - 1; // Update offset for the next feature
     }
-    mvprintw(bd_size + 1, 35, "... ");
 
-    // Print the rewards for each action
-    mvprintw(bd_size + 2, 0, "Rewards: U:%1.1f R:%1.1f D:%1.1f L:%1.1f", 
-             rewards[0], rewards[1], rewards[2], rewards[3]);
-
-    refresh();  // Refresh the screen
+    // refresh();  // Refresh the screen
 }
 
 // Print Board Function outside of ncurses mode once game has ended
@@ -136,19 +138,26 @@ void print_board_ended(){
   }
   std::cout << "Score: " << score << std::endl;
 
-  // Print the first four features
-  std::cout << "Features: ";
-  for (int i = 0; i < 4 && i < features.size(); i++) {
-      std::cout << features[i] << " ";
-  }
-  std::cout << "... " << std::endl;
+  // Print the reward using the global variable
+  std::cout << "Reward: " << reward << std::endl;
 
-  // Print the rewards for each action
-  std::cout << "Rewards: U:" << rewards[0] 
-            << " R:" << rewards[1] 
-            << " D:" << rewards[2] 
-            << " L:" << rewards[3] << std::endl;
+  // Print features 20 at a time
+  std::cout << "Features: " << std::endl; // Print "Features: " followed by a newline
+  for (int i = 0; i < features.size(); i++) {
+      std::cout << static_cast<int>(features[i]); // Print feature as integer
+      if ((i + 1) % 20 == 0) {
+          std::cout << std::endl; // After every 20 features, start a new line
+      } else {
+          std::cout << " "; // Separate features with a space
+      }
+  }
+  if (features.size() % 20 != 0) { // Add a newline if the last line wasn't complete
+      std::cout << std::endl;
+  }
+
+
 }
+
 // Set Wall Function
 void set_walls(){
   int count = 0;
@@ -240,9 +249,7 @@ void Input(){
     refresh();
 }
 
-// AI Input Function
-void AI_Input(const std::vector<double>& output) {
-    // Find the index of the maximum value in output
+int AI_Input(const std::vector<double>& output) {
     int maxIndex = 0;
     double maxValue = output[0];
     for (int i = 1; i < output.size(); ++i) {
@@ -252,20 +259,20 @@ void AI_Input(const std::vector<double>& output) {
         }
     }
 
-    // Map the index to a direction
     Direction newDir;
     if (maxIndex == 0) newDir = UP;
     else if (maxIndex == 1) newDir = DOWN;
     else if (maxIndex == 2) newDir = LEFT;
     else if (maxIndex == 3) newDir = RIGHT;
 
-    // Update dir based on newDir, taking into account the current direction to prevent snake moving into itself
     if (newDir == UP && dir != DOWN) dir = UP;
     else if (newDir == DOWN && dir != UP) dir = DOWN;
     else if (newDir == LEFT && dir != RIGHT) dir = LEFT;
     else if (newDir == RIGHT && dir != LEFT) dir = RIGHT;
 
     refresh();
+
+    return maxIndex; // Return the index of the chosen action
 }
 
 // Logic Function
@@ -334,108 +341,132 @@ bool Logic(){
 }
 
 // Function to generate a vector with the features for deep reinforcement learning
-std::vector<double> get_features(){
-    // The total number of features is 11 (initial features) + bd_size * bd_size (board state)
-    std::vector<double> features(11 + bd_size * bd_size, 0.0);
+std::vector<double> get_features() {
+    // The total number of features is bd_size * bd_size (board state) + 11 (initial features)
+    std::vector<double> features(bd_size * bd_size + 15, 0.0);
+
+    // Flatten the board into a 1D vector and place it at the beginning of features.
+    for (int i = 0; i < bd_size; i++) {
+        for (int j = 0; j < bd_size; j++) {
+            double cellValue = static_cast<double>(board[i][j]);
+            // Set the feature to -1 if the cell contains food, otherwise keep the value
+            // Then, add 1 to all values to avoid negative inputs for ReLU
+            features[i * bd_size + j] = (cellValue == 3.0) ? -1.0 : cellValue;
+            features[i * bd_size + j] += 1.0;
+        }
+    }
+
+    // The number of features representing the board state
+    int board_state_size = bd_size * bd_size;
 
     // Get the head of the snake
     int headX = snake.front().first;
     int headY = snake.front().second;
 
-    // Check if there is a wall or snake body in front of the snake
-    if (dir == UP && (board[headY - 1][headX] == 1 || board[headY - 1][headX] == 2)) {
-        features[0] = 1.0;
-    } else {
-        features[0] = 0.0;
-    }
-    // Check if there is a wall or snake body behind the snake
-    if (dir == DOWN && (board[headY + 1][headX] == 1 || board[headY + 1][headX] == 2)) {
-        features[1] = 1.0;
-    } else {
-        features[1] = 0.0;
-    }
-    // Check if there is a wall or snake body to the left of the snake
-    if (dir == LEFT && (board[headY][headX - 1] == 1 || board[headY][headX - 1] == 2)) {
-        features[2] = 1.0;
-    } else {
-        features[2] = 0.0;
-    }
-    // Check if there is a wall or snake body to the right of the snake
-    if (dir == RIGHT && (board[headY][headX + 1] == 1 || board[headY][headX + 1] == 2)) {
-        features[3] = 1.0;
-    } else {
-        features[3] = 0.0;
-    }
-
-    // Check if the food is above the snake
+    // Food is above the snake
     if (foodY < headY) {
-        features[4] = 1.0;
+        features[board_state_size] = 1.0;
     } else {
-        features[4] = 0.0;
+        features[board_state_size] = 0.0;
     }
-    // Check if the food is below the snake
+
+    // Food is below the snake
     if (foodY > headY) {
-        features[5] = 1.0;
+        features[board_state_size + 1] = 1.0;
     } else {
-        features[5] = 0.0;
+        features[board_state_size + 1] = 0.0;
     }
-    // Check if the food is to the left of the snake
+
+    // Food is to the left of the snake
     if (foodX < headX) {
-        features[6] = 1.0;
+        features[board_state_size + 2] = 1.0;
     } else {
-        features[6] = 0.0;
+        features[board_state_size + 2] = 0.0;
     }
-    // Check if the food is to the right of the snake
+
+    // Food is to the right of the snake
     if (foodX > headX) {
-        features[7] = 1.0;
+        features[board_state_size + 3] = 1.0;
     } else {
-        features[7] = 0.0;
+        features[board_state_size + 3] = 0.0;
     }
 
-    // Check if the current direction is UP
+    // Distance from top wall
+    features[board_state_size + 4] = headY;
+
+    // Distance from bottom wall
+    features[board_state_size + 5] = bd_size - 1 - headY;
+
+    // Distance from left wall
+    features[board_state_size + 6] = headX;
+
+    // Distance from right wall
+    features[board_state_size + 7] = bd_size - 1 - headX;
+
+    // X distance from food
+    features[board_state_size + 8] = std::abs(foodX - headX);
+
+    // Y distance from food
+    features[board_state_size + 9] = std::abs(foodY - headY);
+
+    // Checking if the current direction of the snake is up
     if (dir == UP) {
-        features[8] = 1.0;
+        features[board_state_size + 10] = 1.0;
     } else {
-        features[8] = 0.0;
-    }
-    // Check if the current direction is DOWN
-    if (dir == DOWN) {
-        features[9] = 1.0;
-    } else {
-        features[9] = 0.0;
-    }
-    // Check if the current direction is LEFT
-    if (dir == LEFT) {
-        features[10] = 1.0;
-    } else {
-        features[10] = 0.0;
-    }
-    // Check if the current direction is RIGHT
-    if (dir == RIGHT) {
-        features[11] = 1.0;
-    } else {
-        features[11] = 0.0;
+        features[board_state_size + 10] = 0.0;
     }
 
-    // Flatten the board into a 1D vector and append it to features.
-    // Start from index 11 since that's where the board state should begin.
-    for (int i = 0; i < bd_size; i++) {
-        for (int j = 0; j < bd_size; j++) {
-            features[11 + i * bd_size + j] = static_cast<double>(board[i][j]);
-        }
+    // Checking if the current direction of the snake is down
+    if (dir == DOWN) {
+        features[board_state_size + 11] = 1.0;
+    } else {
+        features[board_state_size + 11] = 0.0;
     }
+
+    // Checking if the current direction of the snake is left
+    if (dir == LEFT) {
+        features[board_state_size + 12] = 1.0;
+    } else {
+        features[board_state_size + 12] = 0.0;
+    }
+
+    // Checking if the current direction of the snake is right
+    if (dir == RIGHT) {
+        features[board_state_size + 13] = 1.0;
+    } else {
+        features[board_state_size + 13] = 0.0;
+    }
+
+    // Add score as the last feature
+    features[board_state_size + 14] = static_cast<double>(score);
 
     return features;
 }
 
-// Function to generate_outputs using a specified reward function
-std::vector<double> get_rewards(bool gameOver, bool hasEatenFood, int currentScore){
+// Function to generate rewards based on the game state
+double calculate_reward(bool gameOver, bool hasEatenFood) {
+    // Define the rewards/penalties for various events
+    const double eatingReward = 10.0;
+    const double deathPenalty = -100.0;
 
-  // Initialize a vector to store the rewards
-  // Starting with a small negative reward for all actions
-  std::vector<double> rewards(4, -0.1);
+    // If the game is over, return a large negative penalty
+    if (gameOver) {
+        return deathPenalty;
+    }
 
-  return rewards;
+    // If the snake eats food, return a positive reward
+    if (hasEatenFood) {
+        return eatingReward;
+    }
+
+    // If none of the above, return a small negative reward to encourage faster learning
+    return -0.1;
+}
+
+// Function to update the Q-value for Deep Q-Learning
+double update_q_value(double currentQValue, double reward, double maxNextQValue, double alpha, double gamma) {
+    // Q-learning formula: Q(s, a) = Q(s, a) + alpha * [reward + gamma * max(Q(s', a')) - Q(s, a)]
+    return currentQValue + alpha * (reward + gamma * maxNextQValue - currentQValue);
 }
 
 // End Game Function
@@ -718,9 +749,11 @@ int main(){
       // Get Features
       features = get_features();
       // Get Rewards
-      rewards = get_rewards(gameOver, hasEatenFood, score);
+      // rewards = get_rewards(gameOver, hasEatenFood, score);
+      reward = calculate_reward(gameOver, hasEatenFood);
 
       print_board();
+      refresh();  // Refresh the screen
 
       // Sleep 
       usleep(sleep_time);
@@ -734,141 +767,132 @@ int main(){
     // Get Features
     features = get_features();
     // Get Rewards
-    rewards = get_rewards(gameOver, hasEatenFood, score);
+    // rewards = get_rewards(gameOver, hasEatenFood, score);
+    reward = calculate_reward(gameOver, hasEatenFood);
 
     print_board_ended();
+
     return 0;
   }
 
-  // AI Moide
-  else if (choice == 2){
-    // Print menu for choosing a model
-    system("clear");
-    std::cout << "Please select a model: " << std::endl;
-    std::cout << "placeholder_model.csv" << std::endl;
-    std::cout << "placeholder_model.csv" << std::endl;
-    std::cout << "placeholder_model.csv" << std::endl;
-    std::cout << "4. Exit" << std::endl;
-    std::cout << "Enter your choice: ";
-    std::cin >> choice;
+  // AI Mode
+  else if (choice == 2) {
+      // Model selection and initial setup
+      system("clear");
+      std::cout << "Please select a model: " << std::endl;
+      std::cout << "1. placeholder_model.csv" << std::endl;
+      std::cout << "2. placeholder_model.csv" << std::endl;
+      std::cout << "3. placeholder_model.csv" << std::endl;
+      std::cout << "4. Exit" << std::endl;
+      std::cout << "Enter your choice: ";
+      std::cin >> choice;
 
-    // Clear the screen for the game
-    system("clear");
+      // Initialize Neural Network
+      srand(time(nullptr));
+      NeuralNetwork nn;
+      int inputSize = bd_size * bd_size + 15;  // Calculate the input size based on board size and additional features
+      nn.addLayer(inputSize, 800, relu);       // First layer now takes the correct input size
+      nn.addLayer(800, 400, relu);             // Subsequent layers remain unchanged
+      nn.addLayer(400, 4, relu);   
 
-    //////////////////////////////////////////////
-    // Initialize the neural network
-    srand(time(nullptr));
+      // Initialize game environment
+      initscr();
+      cbreak();
+      keypad(stdscr, TRUE);
+      noecho();
+      curs_set(0);
+      setup();
+      set_walls();
+      generate_food();
 
-    NeuralNetwork nn;
-    nn.addLayer(1610, 800, relu);
-    nn.addLayer(800, 400, relu);
-    nn.addLayer(400, 4, relu);
-    //////////////////////////////////////////////
+      // Define variables for the AI
+      std::vector<double> input(inputSize), output, current_q_values, next_q_values;
+      double reward, maxNextQValue;
+      double alpha = 0.1, gamma = 0.9; // Hyperparameters
 
-    // Initialize ncurses mode
-    initscr();
-    cbreak();
-    keypad(stdscr, TRUE);
-    noecho();
-    curs_set(0);
+      // Main game loop
+      while (!gameOver) {
+          // Game logic
+          update_snake();
 
-    // Setup the game
-    setup();
-    set_walls();
-    generate_food();
+          // Reinforcement Learning Steps
+          // Step 1: Get Current Features
+          features = get_features();
 
-    // Create input and output vectors
-    std::vector<double> input(1610);
-    std::vector<double> output;
+          // Step 2: Predict Current Q-Values
+          current_q_values = nn.predict(features);
 
-    // Main game loop
-    while(!gameOver){
+          // Step 3: Choose action and Move Snake
+          int actionIndex = AI_Input(current_q_values);
+          hasEatenFood = Logic();
 
-//////////////////////////////////////////////////////////////
-// Randomly initialize an input of length 1610
-for (double& value : input) {
-    value = static_cast<double>(rand()) / RAND_MAX - 0.5;
-}
+          // Step 4: Get Reward
+          reward = calculate_reward(gameOver, hasEatenFood);
 
-// Get the predictions
-output = nn.predict(input);
-//////////////////////////////////////////////////////////////
+          // Step 5: Get Next Features
+          next_features = get_features();
 
-      // Print Board and sleep
-      update_snake();
-      
-      // Get Features
-      features = get_features();
-      // Get Rewards
-      rewards = get_rewards(gameOver, hasEatenFood, score);
+          // Step 6: Predict Next Q-Values
+          next_q_values = nn.predict(next_features);
 
-      print_board();
+          // Step 7: Find Max Q-Value for Next State
+          maxNextQValue = *std::max_element(next_q_values.begin(), next_q_values.end());
 
-      // Print input
-      printw("\n");
-      printw("Input: ");
-      int count = 0;
-      for (double value : input) {
-          printw("%.2f ", value);
-          // Only print first 4 elements
-          if (count == 3) {
-              break;
+          // Step 8: Update Q-Value for the action taken
+          current_q_values[actionIndex] = update_q_value(current_q_values[actionIndex], reward, maxNextQValue, alpha, gamma);
+
+          // Display Information
+          print_board();
+          printw("\n");
+
+          // Display Q-values and direction information for debugging or monitoring within ncurses mode
+          printw("\nCurrent Q-Values: ");
+          for (const double& value : current_q_values) {
+              printw("%.2f ", value);
           }
-          count++;
+
+          printw("\nNext Q-Values: ");
+          for (const double& value : next_q_values) {
+              printw("%.2f ", value);
+          }
+
+          // Print current direction in one-hot encoded format
+          printw("\nDirection: [%d %d %d %d]", 
+                 dir == UP, dir == RIGHT, dir == DOWN, dir == LEFT);
+
+          // Refresh the screen to update the output
+          refresh();
+
+          // Sleep for a set duration
+          usleep(sleep_time);
       }
-      printw("...\n");
 
-      // Print output
-      printw("Predictions: ");
-      for (double value : output) {
-          printw("%.2f ", value);
+      // Ending the game
+      EndGame();
+      system("clear");
+
+      // Print final game state
+      print_board_ended();
+
+      // Display Q-values and direction information for debugging or monitoring
+      std::cout << "\nCurrent Q-Values: ";
+      for (const double& value : current_q_values) {
+          std::cout << value << " ";
       }
-      printw("\n");
 
-      // Move the snake based on the predictions
-      AI_Input(output);
-      hasEatenFood = Logic();
+      std::cout << "\nNext Q-Values: ";
+      for (const double& value : next_q_values) {
+          std::cout << value << " ";
+      }
 
-      // Generate and store features
+      // Print current direction in one-hot encoded format
+      std::cout << "\nDirection: [" 
+                << (dir == UP) << " " 
+                << (dir == RIGHT) << " " 
+                << (dir == DOWN) << " " 
+                << (dir == LEFT) << "]" << std::endl;
 
-      // Sleep
-      usleep(sleep_time);
-    }
-
-    // End the game and ncurses mode
-    EndGame();
-
-    // Print the board (without n curses mode)
-    system("clear");
-
-    // Get Features
-    features = get_features();
-    // Get Rewards
-    rewards = get_rewards(gameOver, hasEatenFood, score);
-
-    print_board_ended();
-
-
-    // Print input (without ncurses mode)
-    std::cout << "Input: ";
-    int count = 0;
-    for (double value : input) {
-        std::printf("%.2f ", value);
-        if (count == 3) {  // This condition will be true after printing the fourth element
-            break;
-        }
-        count++;
-    }
-    std::cout << "...\n";
-
-    // Print output (without ncurses mode)
-    std::cout << "Predictions: ";
-    for (double value : output) {
-        std::printf("%.2f ", value);
-    }
-    std::cout << std::endl;
-
-    return 0;
+      return 0;
   }
 
   // Train AI Model
