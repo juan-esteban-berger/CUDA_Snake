@@ -42,6 +42,9 @@ std::deque<std::pair<int, int>> snake;
 // Direction of the Snake
 Direction dir;
 
+// Int to store the index of the action taken
+int actionIndex;
+
 // Global variable to ensure srand is called only once
 bool isRandomSeeded = false;
 
@@ -260,15 +263,18 @@ int AI_Input(const std::vector<double>& output) {
     }
 
     Direction newDir;
-    if (maxIndex == 0) newDir = UP;
-    else if (maxIndex == 1) newDir = DOWN;
-    else if (maxIndex == 2) newDir = LEFT;
-    else if (maxIndex == 3) newDir = RIGHT;
+    switch(maxIndex) {
+        case 0: newDir = UP; break;
+        case 1: newDir = RIGHT; break;
+        case 2: newDir = DOWN; break;
+        case 3: newDir = LEFT; break;
+    }
 
-    if (newDir == UP && dir != DOWN) dir = UP;
-    else if (newDir == DOWN && dir != UP) dir = DOWN;
-    else if (newDir == LEFT && dir != RIGHT) dir = LEFT;
-    else if (newDir == RIGHT && dir != LEFT) dir = RIGHT;
+    // Allow moving in opposite direction if snake's size is 1
+    if (newDir == UP && (dir != DOWN || snake.size() == 1)) dir = UP;
+    else if (newDir == RIGHT && (dir != LEFT || snake.size() == 1)) dir = RIGHT;
+    else if (newDir == DOWN && (dir != UP || snake.size() == 1)) dir = DOWN;
+    else if (newDir == LEFT && (dir != RIGHT || snake.size() == 1)) dir = LEFT;
 
     refresh();
 
@@ -416,22 +422,22 @@ std::vector<double> get_features() {
         features[board_state_size + 10] = 0.0;
     }
 
-    // Checking if the current direction of the snake is down
-    if (dir == DOWN) {
+    // Checking if the current direction of the snake is right
+    if (dir == RIGHT) {
         features[board_state_size + 11] = 1.0;
     } else {
         features[board_state_size + 11] = 0.0;
     }
 
-    // Checking if the current direction of the snake is left
-    if (dir == LEFT) {
+    // Checking if the current direction of the snake is down
+    if (dir == DOWN) {
         features[board_state_size + 12] = 1.0;
     } else {
         features[board_state_size + 12] = 0.0;
     }
 
-    // Checking if the current direction of the snake is right
-    if (dir == RIGHT) {
+    // Checking if the current direction of the snake is left
+    if (dir == LEFT) {
         features[board_state_size + 13] = 1.0;
     } else {
         features[board_state_size + 13] = 0.0;
@@ -791,9 +797,9 @@ int main(){
       srand(time(nullptr));
       NeuralNetwork nn;
       int inputSize = bd_size * bd_size + 15;  // Calculate the input size based on board size and additional features
-      nn.addLayer(inputSize, 800, relu);       // First layer now takes the correct input size
-      nn.addLayer(800, 400, relu);             // Subsequent layers remain unchanged
-      nn.addLayer(400, 4, relu);   
+      nn.addLayer(inputSize, 256, relu);       // First layer now takes the correct input size
+      nn.addLayer(256, 128, relu);             // Subsequent layers remain unchanged
+      nn.addLayer(128, 4, relu);   
 
       // Initialize game environment
       initscr();
@@ -823,7 +829,8 @@ int main(){
           current_q_values = nn.predict(features);
 
           // Step 3: Choose action and Move Snake
-          int actionIndex = AI_Input(current_q_values);
+          actionIndex = AI_Input(current_q_values);
+
           hasEatenFood = Logic();
 
           // Step 4: Get Reward
@@ -845,16 +852,15 @@ int main(){
           print_board();
           printw("\n");
 
-          // Display Q-values and direction information for debugging or monitoring within ncurses mode
+          // Print current Q-values with corresponding directions
           printw("\nCurrent Q-Values: ");
-          for (const double& value : current_q_values) {
-              printw("%.2f ", value);
-          }
+          printw("UP: %.2f, RIGHT: %.2f, DOWN: %.2f, LEFT: %.2f", 
+                 current_q_values[0], current_q_values[1], current_q_values[2], current_q_values[3]);
 
+          // Print next Q-values with corresponding directions
           printw("\nNext Q-Values: ");
-          for (const double& value : next_q_values) {
-              printw("%.2f ", value);
-          }
+          printw("UP: %.2f, RIGHT: %.2f, DOWN: %.2f, LEFT: %.2f", 
+                 next_q_values[0], next_q_values[1], next_q_values[2], next_q_values[3]);
 
           // Print current direction in one-hot encoded format
           printw("\nDirection: [%d %d %d %d]", 
@@ -874,19 +880,22 @@ int main(){
       // Print final game state
       print_board_ended();
 
-      // Display Q-values and direction information for debugging or monitoring
+      // Print current Q-values with corresponding directions
       std::cout << "\nCurrent Q-Values: ";
-      for (const double& value : current_q_values) {
-          std::cout << value << " ";
-      }
+      std::cout << "UP: " << current_q_values[0] << ", "
+                << "RIGHT: " << current_q_values[1] << ", "
+                << "DOWN: " << current_q_values[2] << ", "
+                << "LEFT: " << current_q_values[3] << std::endl;
 
-      std::cout << "\nNext Q-Values: ";
-      for (const double& value : next_q_values) {
-          std::cout << value << " ";
-      }
+      // Print next Q-values with corresponding directions
+      std::cout << "Next Q-Values: ";
+      std::cout << "UP: " << next_q_values[0] << ", "
+                << "RIGHT: " << next_q_values[1] << ", "
+                << "DOWN: " << next_q_values[2] << ", "
+                << "LEFT: " << next_q_values[3] << std::endl;
 
       // Print current direction in one-hot encoded format
-      std::cout << "\nDirection: [" 
+      std::cout << "Direction: [" 
                 << (dir == UP) << " " 
                 << (dir == RIGHT) << " " 
                 << (dir == DOWN) << " " 
@@ -897,20 +906,171 @@ int main(){
 
   // Train AI Model
   else if (choice == 3){
-    set_walls();
+      // Model selection and initial setup
+      system("clear");
+      std::cout << "Please select a model: " << std::endl;
+      std::cout << "1. placeholder_model.csv" << std::endl;
+      std::cout << "2. placeholder_model.csv" << std::endl;
+      std::cout << "3. placeholder_model.csv" << std::endl;
+      std::cout << "4. Exit" << std::endl;
+      std::cout << "Enter your choice: ";
+      std::cin >> choice;
 
-    snake.push_back({2,3});
-    snake.push_back({2,4});
-    snake.push_back({2,5});
-    snake.push_back({2,6});
-    snake.push_back({2,7});
+      // Initialize Neural Network
+      srand(time(nullptr));
+      NeuralNetwork nn;
+      int inputSize = bd_size * bd_size + 15;  // Calculate the input size based on board size and additional features
+      nn.addLayer(inputSize, 256, relu);       // First layer now takes the correct input size
+      nn.addLayer(256, 128, relu);             // Subsequent layers remain unchanged
+      nn.addLayer(128, 4, relu);   
 
-    update_snake();
-    generate_food();
+      // Initialize game environment
+      initscr();
+      cbreak();
+      keypad(stdscr, TRUE);
+      noecho();
+      curs_set(0);
+      setup();
+      set_walls();
+      generate_food();
 
-    print_board();
-    std::cout << std::endl;
-   
+      // Define variables for the AI
+      std::vector<double> input(inputSize), output, current_q_values, next_q_values;
+      double reward, maxNextQValue;
+      double alpha = 0.1, gamma = 0.9; // Hyperparameters
+
+      // Counter to keep track of the number of moves
+      int moveCounter = 0;
+      // Main game loop
+      while (true) {
+        // Main game loop
+        if (!gameOver) {
+            // Game logic
+            update_snake();
+
+            // Reinforcement Learning Steps
+            // Step 1: Get Current Features
+            features = get_features();
+
+            // Step 2: Predict Current Q-Values
+            current_q_values = nn.predict(features);
+
+            // Step 3: Choose action and Move Snake
+            actionIndex = AI_Input(current_q_values);
+
+            hasEatenFood = Logic();
+
+            // Step 4: Get Reward
+            reward = calculate_reward(gameOver, hasEatenFood);
+
+            // Step 5: Get Next Features
+            next_features = get_features();
+
+            // Step 6: Predict Next Q-Values
+            next_q_values = nn.predict(next_features);
+
+            // Step 7: Find Max Q-Value for Next State
+            maxNextQValue = *std::max_element(next_q_values.begin(), next_q_values.end());
+
+            // Step 8: Update Q-Value for the action taken
+            current_q_values[actionIndex] = update_q_value(current_q_values[actionIndex], reward, maxNextQValue, alpha, gamma);
+
+            // Display Information
+            print_board();
+            printw("\n");
+
+            // Print current Q-values with corresponding directions
+            printw("\nCurrent Q-Values: ");
+            printw("UP: %.2f, RIGHT: %.2f, DOWN: %.2f, LEFT: %.2f", 
+                   current_q_values[0], current_q_values[1], current_q_values[2], current_q_values[3]);
+
+            // Print next Q-values with corresponding directions
+            printw("\nNext Q-Values: ");
+            printw("UP: %.2f, RIGHT: %.2f, DOWN: %.2f, LEFT: %.2f", 
+                   next_q_values[0], next_q_values[1], next_q_values[2], next_q_values[3]);
+
+            // Print current direction in one-hot encoded format
+            printw("\nDirection: [%d %d %d %d]", 
+                   dir == UP, dir == RIGHT, dir == DOWN, dir == LEFT);
+
+            // Refresh the screen to update the output
+            refresh();
+
+            // Sleep for a set duration
+            usleep(sleep_time);
+
+            // Increment the move counter
+            moveCounter++;
+
+            // Check if it's time to pause and train
+            if (moveCounter >= 10) {
+                // Clear the screen and print "Training"
+                clear();
+                printw("Training\n");
+                refresh();
+
+                // Sleep for 10 seconds
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+                usleep(sleep_time);
+
+                // Reset the move counter
+                moveCounter = 0;
+
+                // TODO: Add your training code here
+
+                // Clear the screen and resume the game
+                clear();
+                gameOver = false;
+        }
+        } else {
+        // If the game is over, reset the game state to start again
+        gameOver = false;
+        setup(); // Assuming setup() reinitializes the game state
+        set_walls();
+        generate_food();
+    }
+
+    // Refresh the screen to update the output
+    refresh();
+
+    // Sleep for a set duration
+    usleep(sleep_time);
+      }
+
+      // Ending the game
+      EndGame();
+      system("clear");
+
+      // Print final game state
+      print_board_ended();
+
+      // Print current Q-values with corresponding directions
+      std::cout << "\nCurrent Q-Values: ";
+      std::cout << "UP: " << current_q_values[0] << ", "
+                << "RIGHT: " << current_q_values[1] << ", "
+                << "DOWN: " << current_q_values[2] << ", "
+                << "LEFT: " << current_q_values[3] << std::endl;
+
+      // Print next Q-values with corresponding directions
+      std::cout << "Next Q-Values: ";
+      std::cout << "UP: " << next_q_values[0] << ", "
+                << "RIGHT: " << next_q_values[1] << ", "
+                << "DOWN: " << next_q_values[2] << ", "
+                << "LEFT: " << next_q_values[3] << std::endl;
+
+      // Print current direction in one-hot encoded format
+      std::cout << "Direction: [" 
+                << (dir == UP) << " " 
+                << (dir == RIGHT) << " " 
+                << (dir == DOWN) << " " 
+                << (dir == LEFT) << "]" << std::endl;
+
     return 0;
   }
 
