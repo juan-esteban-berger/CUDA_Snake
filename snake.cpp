@@ -59,6 +59,12 @@ double reward = 0.0;
 std::vector<double> current_q_values;
 std::vector<double> next_q_values;
 
+// 2D Vectors for the inputs and targets
+std::vector<std::vector<double>> inputs;
+std::vector<std::vector<double>> target;
+
+int epoch_counter;
+
 ////////////////////////////////////////////////////////////////////////
 // Preliminary Functions
 // Setup Function
@@ -66,6 +72,12 @@ void setup(){
     if (!isRandomSeeded) {
         srand(time(nullptr));
         isRandomSeeded = true;
+    }
+    // Reset the board to zero
+    for (int i = 0; i < bd_size; ++i) {
+        for (int j = 0; j < bd_size; ++j) {
+            board[i][j] = 0;
+        }
     }
     gameOver = false;
     score = 0;
@@ -281,6 +293,29 @@ int AI_Input(const std::vector<double>& output) {
     return maxIndex; // Return the index of the chosen action
 }
 
+int choose_random_direction() {
+    int randomIndex = rand() % 4; // Generate a random number between 0 and 3
+
+    Direction newDir;
+    switch(randomIndex) {
+        case 0: newDir = UP; break;
+        case 1: newDir = RIGHT; break;
+        case 2: newDir = DOWN; break;
+        case 3: newDir = LEFT; break;
+    }
+
+    // Implement the logic for updating the direction here, similar to AI_Input
+    // For example:
+    if (newDir == UP && (dir != DOWN || snake.size() == 1)) dir = UP;
+    else if (newDir == RIGHT && (dir != LEFT || snake.size() == 1)) dir = RIGHT;
+    else if (newDir == DOWN && (dir != UP || snake.size() == 1)) dir = DOWN;
+    else if (newDir == LEFT && (dir != RIGHT || snake.size() == 1)) dir = LEFT;
+
+    refresh();
+
+    return randomIndex; // Return the index of the chosen action
+}
+
 // Logic Function
 bool Logic(){
     int prevX = x;  // Store the previous x before updating
@@ -349,7 +384,8 @@ bool Logic(){
 // Function to generate a vector with the features for deep reinforcement learning
 std::vector<double> get_features() {
     // The total number of features is bd_size * bd_size (board state) + 11 (initial features)
-    std::vector<double> features(bd_size * bd_size + 15, 0.0);
+    // std::vector<double> features(bd_size * bd_size + 15, 0.0);
+    std::vector<double> features(bd_size * bd_size + 14, 0.0);
 
     // Flatten the board into a 1D vector and place it at the beginning of features.
     for (int i = 0; i < bd_size; i++) {
@@ -415,58 +451,94 @@ std::vector<double> get_features() {
     // Y distance from food
     features[board_state_size + 9] = std::abs(foodY - headY);
 
-    // Checking if the current direction of the snake is up
-    if (dir == UP) {
-        features[board_state_size + 10] = 1.0;
-    } else {
-        features[board_state_size + 10] = 0.0;
-    }
+    //// Checking if the current direction of the snake is up
+    //if (dir == UP) {
+    //    features[board_state_size + 10] = 1.0;
+    //} else {
+    //    features[board_state_size + 10] = 0.0;
+    //}
 
-    // Checking if the current direction of the snake is right
-    if (dir == RIGHT) {
-        features[board_state_size + 11] = 1.0;
-    } else {
-        features[board_state_size + 11] = 0.0;
-    }
+    //// Checking if the current direction of the snake is right
+    //if (dir == RIGHT) {
+    //    features[board_state_size + 11] = 1.0;
+    //} else {
+    //    features[board_state_size + 11] = 0.0;
+    //}
 
-    // Checking if the current direction of the snake is down
-    if (dir == DOWN) {
-        features[board_state_size + 12] = 1.0;
-    } else {
-        features[board_state_size + 12] = 0.0;
-    }
+    //// Checking if the current direction of the snake is down
+    //if (dir == DOWN) {
+    //    features[board_state_size + 12] = 1.0;
+    //} else {
+    //    features[board_state_size + 12] = 0.0;
+    //}
 
-    // Checking if the current direction of the snake is left
-    if (dir == LEFT) {
-        features[board_state_size + 13] = 1.0;
-    } else {
-        features[board_state_size + 13] = 0.0;
-    }
+    //// Checking if the current direction of the snake is left
+    //if (dir == LEFT) {
+    //    features[board_state_size + 13] = 1.0;
+    //} else {
+    //    features[board_state_size + 13] = 0.0;
+    //}
 
     // Add score as the last feature
-    features[board_state_size + 14] = static_cast<double>(score);
+    // features[board_state_size + 14] = static_cast<double>(score);
+    features[board_state_size + 10] = static_cast<double>(score);
 
     return features;
 }
 
 // Function to generate rewards based on the game state
+// double calculate_reward(bool gameOver, bool hasEatenFood) {
+//     // Define the rewards/penalties for various events
+//     const double eatingReward = 10.0;
+//     const double deathPenalty = -100.0;
+// 
+//     // If the game is over, return a large negative penalty
+//     if (gameOver) {
+//         return deathPenalty;
+//     }
+// 
+//     // If the snake eats food, return a positive reward
+//     if (hasEatenFood) {
+//         return eatingReward;
+//     }
+// 
+//     // If none of the above, return a small negative reward to encourage faster learning
+//     return -0.1;
+// }
 double calculate_reward(bool gameOver, bool hasEatenFood) {
-    // Define the rewards/penalties for various events
-    const double eatingReward = 10.0;
+    const double eatingReward = 50.0;  // Reward for eating food
     const double deathPenalty = -100.0;
+    const double timeStepPenalty = 0;  // Penalty for each time step
+    const double sizeReward = 5.0;  // Reward for each point in score
+    const double nearCollisionPenalty = -5.0;  // Penalty for near collision
 
-    // If the game is over, return a large negative penalty
+    double reward = timeStepPenalty;
+
+    // Check for game over
     if (gameOver) {
         return deathPenalty;
     }
 
-    // If the snake eats food, return a positive reward
+    // Check if food is eaten
     if (hasEatenFood) {
-        return eatingReward;
+        reward += eatingReward;
     }
 
-    // If none of the above, return a small negative reward to encourage faster learning
-    return -0.1;
+    // Reward based on the size of the snake (score)
+    reward += score * sizeReward;
+
+    // Penalty for near collision
+    int headX = snake.front().first;
+    int headY = snake.front().second;
+
+    for (auto it = ++snake.begin(); it != snake.end(); ++it) {
+        if (std::abs(it->first - headX) <= 1 && std::abs(it->second - headY) <= 1) {
+            reward += nearCollisionPenalty;
+            break;
+        }
+    }
+
+    return reward;
 }
 
 // Function to update the Q-value for Deep Q-Learning
@@ -497,216 +569,169 @@ double relu_derivative(double x){
   }
 }
 
+// Tanh Function
+double tanh_function(double x){
+  return tanh(x);
+}
+
+// Derivative of Tanh Function
+double tanh_derivative(double x){
+  double tanh_x = tanh(x);
+  return 1.0 - tanh_x * tanh_x;
+}
+
+// Layer Class
 class Layer {
   public:
-    // Initialize weights, biases, and other parameters
-    std::vector<std::vector<double>> weights; // 2D vector to store the weights
-    std::vector<double> biases; // 1D vector to store the biases
-    std::vector<double> outputs; // 1D vector to store the outputs
-    int inputSize, outputSize; // Integers to store the input and output sizes
-    std::function<double(double)> activationFunction; // Activation function
-    std::vector<std::vector<double>> dweights; // 2D vector to store the derivatives of
-                                               // of the weights with respect to the loss
-    std::vector<double> dbiases; // 1D vector to store the derivatives of the biases
-                                 // with respect to the loss
-    std::vector<double> dinputs; // 1D vector to store the derivatives of the inputs
-                                 // with respect to the loss
-    // Constructor
-    Layer(
-        int inputSize,
-        int outputSize,
-        std::function<double(double)> activationFunction
-        ): inputSize(inputSize), 
-           outputSize(outputSize),
-           activationFunction(activationFunction) {
+    std::vector<std::vector<double>> weights;
+    std::vector<double> biases;
+    std::vector<double> outputs;
+    int inputSize, outputSize;
+    std::function<double(double)> activationFunction;
+    std::function<double(double)> activationFunctionDerivative;
+    std::vector<std::vector<double>> dweights;
+    std::vector<double> dbiases;
+    std::vector<double> dinputs;
 
-      // Resize the weights matrix to have 'outputSize' rows and 'inputSize' columns
-      weights.resize(outputSize, std::vector<double>(inputSize));
-      // Resize the biases vector to have 'outputSize' elements
-      biases.resize(outputSize);
-      // Ensure srand is called only once
-      if (!isRandomSeeded) {
-        srand(time(nullptr));
-        isRandomSeeded = true;
-      }
-      // Initialize the weights and biases with random values
-      for (int i = 0; i < outputSize; ++i) {
-        for (int j = 0; j < inputSize; ++j) {
-          // Random number between -0.5 and 0.5
-          weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+    // Constructor
+    Layer(int inputSize, int outputSize,
+          std::function<double(double)> activationFunction,
+          std::function<double(double)> activationFunctionDerivative)
+        : inputSize(inputSize), outputSize(outputSize),
+          activationFunction(activationFunction),
+          activationFunctionDerivative(activationFunctionDerivative) {
+
+        weights.resize(outputSize, std::vector<double>(inputSize));
+        biases.resize(outputSize);
+
+        // Ensure srand is called only once
+        static bool isRandomSeeded = false;
+        if (!isRandomSeeded) {
+            srand(static_cast<unsigned int>(time(nullptr)));
+            isRandomSeeded = true;
         }
-        // Random number between -0.5 and 0.5
-        biases[i] = static_cast<double>(rand()) / RAND_MAX - 0.5;
-      }
+
+        // Initialize the weights and biases with random values between -0.5 and 0.5
+        for (int i = 0; i < outputSize; ++i) {
+            for (int j = 0; j < inputSize; ++j) {
+                // weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+                 weights[i][j] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+            }
+            // biases[i] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+            biases[i] = static_cast<double>(rand()) / RAND_MAX - 0.5;
+        }
     }
 
     // Forward Pass Function
     std::vector<double> forward(const std::vector<double>& input) {
-      // Resize the outputs vector to be the same as outputSize
-      outputs.resize(outputSize);
-      // Each value in the outputs vector should be the sum of
-      // the each input and its corresponding weight, plus the bias
-      for (int i = 0; i < outputSize; ++i) {
-        // Initialize the output to zero
-        outputs[i] = 0;
-        // Iterate throught the inputs
-        for (int j = 0; j < inputSize; ++j) {
-          // Sum the weighted input
-          outputs[i] += input[j] * weights[i][j];
+        outputs.resize(outputSize);
+        for (int i = 0; i < outputSize; ++i) {
+            outputs[i] = 0;
+            for (int j = 0; j < inputSize; ++j) {
+                outputs[i] += input[j] * weights[i][j];
+            }
+            outputs[i] += biases[i];
+            outputs[i] = activationFunction(outputs[i]);
         }
-        // Add the bias
-        outputs[i] += biases[i];
-        // Pass through the activation function
-        outputs[i] = activationFunction(outputs[i]);
-      }
-      return outputs;
+        return outputs;
     }
 
     // Backward Pass Function
-    std::vector<double> backward(
-        const std::vector<double>& doutputs,
-        const std::vector<double>& inputs) {
+    std::vector<double> backward(const std::vector<double>& doutputs, const std::vector<double>& inputs) {
+        dweights.resize(outputSize, std::vector<double>(inputSize));
+        dbiases.resize(outputSize);
+        dinputs.resize(inputSize, 0.0);
 
-      // Resize dweights to match the dimensions of the
-      // weights matrix in the current layer
-      dweights.resize(outputSize, std::vector<double>(inputSize));
-      // Reisze dbiases to match the dimensions of the
-      // biases vector in the current layer
-      dbiases.resize(outputSize);
-      // Resize dinputs to match the dimensions of the
-      // inputs vector in the current layer
-      // Initialize all the values to 0.0
-      dinputs.resize(inputSize, 0.0);
+        for (int i = 0; i < outputSize; i++) {
+            double dActivation = doutputs[i] * activationFunctionDerivative(outputs[i]);
+            dbiases[i] = dActivation;
 
-      // Iterate once for each output
-      for (int i = 0; i <outputSize; i++){
-        // The derivative of the loss with respect to the bias
-        // is equal to the derivative of the output with respect
-        dbiases[i] = doutputs[i];
-
-        // Iterate once for each input
-        for (int j = 0; j < inputSize; j++){
-          // Use the chain rule to calculate the derivative of the loss
-          // with respect to the weight
-          dweights[i][j] = inputs[j] * doutputs[i];
-          // Use the chain rule to calculate the derivative of the loss
-          // with respect to the input
-          dinputs[j] += weights[i][j] * doutputs[i];
+            for (int j = 0; j < inputSize; j++) {
+                dweights[i][j] = inputs[j] * dActivation;
+                dinputs[j] += weights[i][j] * dActivation;
+            }
         }
-      }
 
-      return dinputs;
-
+        return dinputs;
     }
-
 };
 
-// Neural Network Class
-class NeuralNetwork{
+class NeuralNetwork {
   public:
-    // Vector to store the layers of the neural network.
     std::vector<Layer> layers;
 
     // Function to add a layer to the Neural Network
-    void addLayer(
-        int inputSize, 
-        int outputSize,
-        std::function<double(double)> activationFunction) {
-        // Use emplace_back instead of push_back in order to constructs an object in-place at the end of the container, rather than adding a copy of an existing object to the end of a container.
-        layers.emplace_back(inputSize, outputSize, activationFunction);
+    void addLayer(int inputSize, int outputSize, std::function<double(double)> activationFunction,
+                  std::function<double(double)> activationFunctionDerivative) {
+        layers.emplace_back(inputSize, outputSize, activationFunction, activationFunctionDerivative);
     }
 
     // Function to train the Neural Network
-    void train(
-        std::vector<std::vector<double>> inputs,
-        std::vector<std::vector<double>> targets,
-        double learningRate,
-        int epochs){
-          // Iterate once through each epoch
-          for (int epoch = 0; epoch < epochs; epoch++) {
-            // Double to store the total error for this epoch
+    void train(std::vector<std::vector<double>>& inputs, std::vector<std::vector<double>>& targets,
+               double learningRate, int epochs) {
+        size_t interval = std::max(size_t(1), inputs.size() / 20);
+
+        for (int epoch = 0; epoch < epochs; epoch++) {
             double totalError = 0;
 
-            // Loop through all the training examples
-            for (size_t i = 0; i < inputs.size(); i++){
-             
-              // Vector to store the current input
-              std::vector<double> input = inputs[i];
-              // Vector to store the original inputs for each layer
-              // (for use in the backward pass)
-              std::vector<std::vector<double>> layerInputs;
+            for (size_t i = 0; i < inputs.size(); i++) {
+                std::vector<double> input = inputs[i];
+                std::vector<std::vector<double>> layerInputs;
 
-              // Loop throuch each layer in the Network
-              // performing a forward pass in each iteration
-              for (Layer& layer : layers){
-                // Store the original input for use in the backward pass
-                layerInputs.push_back(input);
-                // Perform a forward pass
-                input = layer.forward(input);
-              }
-
-              // Create a new vector to store the output
-              // which is currently stored in input
-              std::vector<double> output = input;
-              // Create a new vector to store the derivative of the loss
-              // with respect to the output of the last layer
-              std::vector<double> dLoss_dOutput(output.size());
-              // Double to store the loss
-              double loss = 0.0;
-
-              // Iterate through each element in the output
-              for (size_t j = 0; j < output.size(); j++){
-                // Calculate the error
-                double error = output[j] - targets[i][j];
-                // Add the error to the loss
-                loss += error * error;
-                // Calculate the derivative of the loss with respect to the output
-                // This is the derivative of the Mean Squared Error
-                // dLoss_dOutput[j] = 2 * output[j] - targets[i][j] / output.size();
-                dLoss_dOutput[j] = 2 * error / output.size();
-              }
-
-              // Add the loss to the total error
-              totalError += loss / output.size();
-
-              // Vector to store the derivative of the output
-              // with respect to the input of the last layer
-              std::vector<double> dOutput = dLoss_dOutput;
-
-              // Loop through each layer in the network in reverse
-              for (int j = layers.size() - 1; j >= 0; --j){
-                // Perform a backward pass
-                dOutput = layers[j].backward(dOutput, layerInputs[j]);
-              }
-
-              // Loop through each layer
-              for (Layer& layer : layers){
-                // Loop through each weight in the layer
-                for (size_t k = 0; k < layer.weights.size(); ++k){
-                  for (size_t l = 0; l < layer.weights[k].size(); ++l){
-                    // Update the weight
-                    layer.weights[k][l] -= learningRate * layer.dweights[k][l];
-                  }
-                  // Update the bias
-                  layer.biases[k] -= learningRate * layer.dbiases[k];
+                for (Layer& layer : layers) {
+                    layerInputs.push_back(input);
+                    input = layer.forward(input);
                 }
-              }
 
+                std::vector<double> output = input;
+                std::vector<double> dLoss_dOutput(output.size());
+                double loss = 0.0;
+
+                for (size_t j = 0; j < output.size(); j++) {
+                    double error = output[j] - targets[i][j];
+                    loss += error * error;
+                    dLoss_dOutput[j] = 2 * error / output.size();
+                }
+
+                totalError += loss / output.size();
+                std::vector<double> dOutput = dLoss_dOutput;
+
+                for (int j = layers.size() - 1; j >= 0; --j) {
+                    dOutput = layers[j].backward(dOutput, layerInputs[j]);
+                }
+
+                for (Layer& layer : layers) {
+                    for (size_t k = 0; k < layer.weights.size(); ++k) {
+                        for (size_t l = 0; l < layer.weights[k].size(); ++l) {
+                            layer.weights[k][l] -= learningRate * layer.dweights[k][l];
+                        }
+                        layer.biases[k] -= learningRate * layer.dbiases[k];
+                    }
+                }
+
+                // Progress bar update
+                if (i % interval == 0 || i == inputs.size() - 1) {
+										clear();
+										printw("Epoch %d / %d\n", epoch + 1, epochs);
+                    int progress = static_cast<int>((static_cast<double>(i) / inputs.size()) * 100);
+                    printw("[");
+										for (size_t p = 0; p < 100; p += 5) {
+												printw(p <= progress ? "#" : "-");
+                    }
+										printw("] %d%%\n", progress);
+
+										// Display the average error for this training example
+										printw("Training Example %zu / %zu, Error: %f\n", i + 1, inputs.size(), totalError / (i + 1));
+										refresh();
+                }
             }
-
-            // Print the average error for this dataset
-            std::cout << "Epoch " << epoch + 1 << " / " << epochs << ", Error: " << totalError / inputs.size() << std::endl;
-          }
+        }
     }
 
     // Function to use the Neural Networks to make predictions
     std::vector<double> predict(const std::vector<double>& input) {
-        // Initialize a vector to store the current output that starts
-        // by being equal to the input
         std::vector<double> currentOutput = input;
-        // Iterate through each layer in the neural network
         for (Layer& layer : layers) {
-            // Update the current output by calling the forward function
             currentOutput = layer.forward(currentOutput);
         }
         return currentOutput;
@@ -720,9 +745,14 @@ int main(){
   // Declare variables
   int choice;
   int sleep_time;
+  NeuralNetwork nn;
 
   // Set sleep time
-  sleep_time = 160000;
+  // sleep_time = 160000;
+  sleep_time = 8000;
+  // sleep_time = 4000;
+  // sleep_time = 500;
+  // sleep_time = 1;
 
   // Print menu
   system("clear");
@@ -795,11 +825,10 @@ int main(){
 
       // Initialize Neural Network
       srand(time(nullptr));
-      NeuralNetwork nn;
       int inputSize = bd_size * bd_size + 15;  // Calculate the input size based on board size and additional features
-      nn.addLayer(inputSize, 256, relu);       // First layer now takes the correct input size
-      nn.addLayer(256, 128, relu);             // Subsequent layers remain unchanged
-      nn.addLayer(128, 4, relu);   
+      nn.addLayer(inputSize, 256, tanh, tanh_derivative);       // First layer now takes the correct input size
+      nn.addLayer(256, 128, tanh, tanh_derivative);             // Subsequent layers remain unchanged
+      nn.addLayer(128, 4, tanh, tanh_derivative);   
 
       // Initialize game environment
       initscr();
@@ -813,8 +842,9 @@ int main(){
 
       // Define variables for the AI
       std::vector<double> input(inputSize), output, current_q_values, next_q_values;
-      double reward, maxNextQValue;
+      double maxNextQValue;
       double alpha = 0.1, gamma = 0.9; // Hyperparameters
+      // double alpha = 1, gamma = 0.9; // Hyperparameters
 
       // Main game loop
       while (!gameOver) {
@@ -918,11 +948,14 @@ int main(){
 
       // Initialize Neural Network
       srand(time(nullptr));
-      NeuralNetwork nn;
-      int inputSize = bd_size * bd_size + 15;  // Calculate the input size based on board size and additional features
-      nn.addLayer(inputSize, 256, relu);       // First layer now takes the correct input size
-      nn.addLayer(256, 128, relu);             // Subsequent layers remain unchanged
-      nn.addLayer(128, 4, relu);   
+      int inputSize = bd_size * bd_size + 11;  // Calculate the input size based on board size and additional features
+      nn.addLayer(inputSize, 64, tanh, tanh_derivative);       // First layer now takes the correct input size
+      nn.addLayer(64, 32, tanh, tanh_derivative);             // Subsequent layers remain unchanged
+      nn.addLayer(32, 4, tanh, tanh_derivative);   
+
+			// Clear input and target vectors
+			inputs.clear();
+      target.clear();
 
       // Initialize game environment
       initscr();
@@ -935,12 +968,17 @@ int main(){
       generate_food();
 
       // Define variables for the AI
-      std::vector<double> input(inputSize), output, current_q_values, next_q_values;
-      double reward, maxNextQValue;
-      double alpha = 0.1, gamma = 0.9; // Hyperparameters
+      // std::vector<double> input(inputSize), output, current_q_values, next_q_values;
+      std::vector<double> current_q_values, next_q_values;
+      double maxNextQValue;
+      // double alpha = 0.1, gamma = 0.8; // Hyperparameters
+      double alpha = 0.01, gamma = 0.8; // Hyperparameters
 
       // Counter to keep track of the number of moves
       int moveCounter = 0;
+			epoch_counter = 0;
+			int training_moves = 1000;
+
       // Main game loop
       while (true) {
         // Main game loop
@@ -955,8 +993,14 @@ int main(){
             // Step 2: Predict Current Q-Values
             current_q_values = nn.predict(features);
 
-            // Step 3: Choose action and Move Snake
-            actionIndex = AI_Input(current_q_values);
+// Step 3: Choose action and Move Snake
+if (epoch_counter < -1) {
+    // Every 10th move, choose a random direction
+    actionIndex = choose_random_direction();
+} else {
+    // Other moves, use AI input
+    actionIndex = AI_Input(current_q_values);
+}
 
             hasEatenFood = Logic();
 
@@ -974,6 +1018,10 @@ int main(){
 
             // Step 8: Update Q-Value for the action taken
             current_q_values[actionIndex] = update_q_value(current_q_values[actionIndex], reward, maxNextQValue, alpha, gamma);
+
+						// Append Features and Targets to Training Dataset
+					  inputs.push_back(features);
+            target.push_back(next_q_values);
 
             // Display Information
             print_board();
@@ -1003,30 +1051,34 @@ int main(){
             moveCounter++;
 
             // Check if it's time to pause and train
-            if (moveCounter >= 10) {
+            if (moveCounter >= training_moves) {
+///////////////////////////////////////////////////////////////////////////////////////
                 // Clear the screen and print "Training"
                 clear();
                 printw("Training\n");
-                refresh();
+								std::cout << "\n";
+								printw("Length of inputs vector: %lu\n", inputs.size());
+								printw("Length of targets vector: %lu\n", target.size());
+								refresh();	
+								// TODO: Add your training code here
+								nn.train(inputs, target, 0.001, 3);
+								refresh();
+								// TODO: Implement Short Term (Completely random) mid term, and long term training...
 
                 // Sleep for 10 seconds
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
-                usleep(sleep_time);
+                usleep(500000);
+								refresh();
 
                 // Reset the move counter
                 moveCounter = 0;
 
-                // TODO: Add your training code here
+								// Clear input and target vectors
+								inputs.clear();
+								target.clear();
 
                 // Clear the screen and resume the game
                 clear();
-                gameOver = false;
+///////////////////////////////////////////////////////////////////////////////////////
         }
         } else {
         // If the game is over, reset the game state to start again
@@ -1034,13 +1086,15 @@ int main(){
         setup(); // Assuming setup() reinitializes the game state
         set_walls();
         generate_food();
-    }
+    		}
+				// Refresh the screen to update the output
+				refresh();
 
-    // Refresh the screen to update the output
-    refresh();
+				// Sleep for a set duration
+				usleep(sleep_time);
 
-    // Sleep for a set duration
-    usleep(sleep_time);
+				// Increase epoch_counter
+				epoch_counter++;
       }
 
       // Ending the game
