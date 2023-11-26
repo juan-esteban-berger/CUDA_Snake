@@ -10,7 +10,7 @@ int main() {
 	// Set Walls
 	setWalls();
 
-	// Randomly Generate the Food, Snake, and Direction
+	// Randomly Generate the Food, Direction, and Snake
 	generateFood();
 	generateDirection();
 	generateSnake();
