@@ -73,6 +73,15 @@ $$Q_{\text{new}}(s, a) = Q(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q(s',
 - $\gamma$ is the discount factor.
 - $\max_{a'} Q(s', a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 
+Simplified Bellman Equations
+$$Q_{\text{new}} = R + \gamma \max(Q(\text{state1}))$$
+
+- $Q_{\text{new}}$ represents the new Q value, the updated estimation of the value for a given state-action pair.
+- $R$ is the immediate reward received after taking an action in the current state.
+- $\gamma$ is the discount factor, a number between 0 and 1, which reduces the value of future rewards.
+- $\max(Q(\text{state1}))$ is the maximum predicted Q value for the next state (state1) across all possible actions, representing the best possible outcome from the next state according to the current model's understanding.
+
+
 ```mermaid
 graph LR
     subgraph Input Layer
