@@ -60,7 +60,7 @@
 ## Deep Reinforcement Learning
 Bellman Equations
 
-$$Q_{new}(s, a) = Q(s,a) + \alpha [R(s, a) \gamma {Q'}_{max}(s', a') - Q(s,a)]]$$
+$$Q_{\text{new}}(s, a) = Q(s,a) + \alpha [R(s, a) \gamma {Q'}_{\text{max}}(s', a') - Q(s,a)]]$$
 
 where $Q_{new}(s,a)$ is the new $Q$ value for a given state and action.
 
