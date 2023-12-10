@@ -1,8 +1,7 @@
 # Reinforcement Learning Snake Game from Scratch in C accelerated by CUDA
 
-## Demonstration
-
 ## Introduction
+This project demonstrates how to train an AI agent to play the classic snake game using deep reinforcement learning. This code for this project was written in C and the CUDA framework was used to extend this program's capability to use NVIDIA GPUs for training. The choice to use C over C++ for this project was deliberate to gain a further understanding of deep reinforcement learning by coding everything from scratch and having to deal with direct memory management. Even though C does not have classes, structs were used to organize the code, allowing for a semblance of object-oriented programming principles to be incorporated into this project.
 
 ## Game Modes
 - **Normal Mode:** Allows User to Play the Game Normally
@@ -65,18 +64,18 @@ classDiagram
 ## Deep Reinforcement Learning
 Bellman Equations
 
-$$Q_{\text{new}}(s, a) = Q(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q(s', a') - Q(s, a)\right]$$
+$$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q_{\text{new}}(s', a') - Q_{\text{current}}(s, a)\right]$$
 
 - $Q_{\text{new}}(s, a)$ is the new $Q$ value for a given state-action pair.
-- $Q(s, a)$ is the current $Q$ value for the current state-action pair.
+- $Q_{\text{current}}(s, a)$ is the current $Q$ value for the current state-action pair.
 - $\alpha$ is the learning rate.
 - $R(s, a)$ is the reward received after taking action $a$ in state $s$.
 - $\gamma$ is the discount factor.
-- $\max_{a'} Q(s', a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
+- $\max_{a'} Q_{\text{new}}(s', a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 
 Simplified Bellman Equations
-$$Q_{\text{old}} = \text{model.predict}(\text{state0})$$
-$$Q_{\text{new}} = R + \gamma \max(Q(\text{state1}))$$
+$$Q_{\text{current}}(s) = \text{model.predict}(s)$$
+$$Q_{\text{new}}(s) = R + \gamma \max(Q_{\text{current}}(s'))$$
 
 ### Deep Q-Learning Training Algorithm
 ```python
