@@ -122,14 +122,10 @@ The model used in deep reinforcement learning is a simple fully connected feed-f
 2. Danger_DOWN: Binary flag indicating if there is a wall directly below the snake's tail.
 3. Danger_LEFT: Binary flag indicating if there is a wall to the immediate left of the snake's head.
 4. Danger_RIGHT: Binary flag indicating if there is a wall to the immediate right of the snake's head.
-
-**Direction:**
 5. Direction_UP: Binary flag indicating if the snake is currently moving up.
 6. Direction_DOWN: Binary flag indicating if the snake is currently moving down.
 7. Direction_LEFT: Binary flag indicating if the snake is currently moving left.
 8. Direction_RIGHT: Binary flag indicating if the snake is currently moving right.
-
-**Food:**
 9. Food_UP: Distance (normalized between 0 and 1) between the food and the top of the game board.
 10. Food_DOWN: Distance (normalized between 0 and 1) between the food and the bottom of the game board.
 11. Food_LEFT: Distance (normalized between 0 and 1) between the food and the left edge of the game board.
