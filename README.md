@@ -252,6 +252,7 @@ $$\cdot g2$$
 print(asdf)
 ```
 
+# Cuda Acceleration
 
 ## Results
 
