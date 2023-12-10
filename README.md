@@ -121,8 +121,8 @@ while not game_over:
 
 ## Neural Network Inputs
 The model used in deep reinforcement learning is a simple fully connected feed-forward neural network. This neural network collects the following 12 features after every move:
-1. Danger_UP: Binary flag indicating if there is a wall or a part of the snake directly above the snake's head.
-2. Danger_DOWN: Binary flag indicating if there is a wall or a part of the snake directly below the snake's tail.
+1. Score: The score of the game which is equal to the length of the snake.
+2. Danger_UP: Binary flag indicating if there is a wall or a part of the snake directly above the snake's head.
 3. Danger_LEFT: Binary flag indicating if there is a wall or a part of the snake to the immediate left of the snake's head.
 4. Danger_RIGHT: Binary flag indicating if there is a wall or a part of the snake to the immediate right of the snake's head.
 5. Direction_UP: Binary flag indicating if the snake is currently moving up.
@@ -131,11 +131,14 @@ The model used in deep reinforcement learning is a simple fully connected feed-f
 8. Direction_RIGHT: Binary flag indicating if the snake is currently moving right.
 9. Food_UP: Binary flag indicating if the food is above the snake.
 10. Food_DOWN: Binary flag indicating if the food is below the snake.
-11. Food_LEFT: Binary flag indicating if the food is to the left the snake.
-12. Food_RIGHT: Binary flag indicating if the food is to the right the snake.
+11. Food_LEFT: Binary flag indicating if the food is to the left of the snake.
+12. Food_RIGHT: Binary flag indicating if the food is to the right of the snake.
 
 ## Neural Network Outputs
-The neural network used in this project will have 4 outputs. The output would be one q_value corresponding to each of the four directions the snake can move, given the current game state the snake is in. At the beginning of training, the snake will make random moves, but will later use the neural network in order to determine its next move.
+The neural network used in this project will have 3 outputs. The output would be one q_value corresponding to each of the four directions the snake can move, given the current game state the snake is in. At the beginning of training, the snake will make random moves, but will later use the neural network to determine its next move. The outputs to the neural network are the following:
+1. Q_Value_UP
+2. Q_Value_Left
+3. Q_Value_Right
 
 ## Forward Propagation
 Forward propagation is the algorithm used to calculate a prediction based on the inputs given to the neural network. To understand how the neural network performs forward propagation, the following diagram of a very simple neural network is shown.
