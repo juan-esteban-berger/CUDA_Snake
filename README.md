@@ -232,11 +232,11 @@ $$\frac{d}{dx}\sigma(x) = \sigma(x) \cdot (1 - \sigma(x))$$
 
 and our loss function is
 
-$$MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$
+$$MSE = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2$$
 
 and the derivative of our loss function is
 
-$$\frac{\partial}{\partial \hat{y_i}} MSE$$
+$$\frac{\partial}{\partial \hat{y_i}} MSE= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} - y_i)$$
 
 $$\frac{\partial MSE}{\partial \hat{y}_i} = \frac{2}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)$$
 
