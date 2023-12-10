@@ -18,7 +18,7 @@ classDiagram
         int* SnakeY
         int FoodX
         int FoodY
-        bool State
+        bool gameOver
         void Initialize()
         int UserInput()
         int AgentInput()
@@ -77,6 +77,43 @@ Simplified Bellman Equations
 $$Q_{\text{old}} = \text{model.predict}(\text{state0})$$
 $$Q_{\text{new}} = R + \gamma \max(Q(\text{state1}))$$
 
+### Deep Q-Learning Training Algorithm
+```python
+while not game_over:
+    # Get Current State
+    current_state = get_state()
+
+    # Predict Q values for the current state (one q_val for each action)
+    current_qvals = model.predict(current_state)
+
+    # Choose an action based on current q_values
+    # Could be at random at the beginning of the highest q-value later in training
+    action = choose_action(current_qvals)
+
+    # Update game_over value depending on what happened with the last action
+    game_over = updateGameOver()
+
+    # Take the action
+    take_action(action)
+
+    # Predict Q values for the next state
+    next_state = get_state()
+
+    # Predict Q values for the next state (one q_val for each action)
+    next_qvals = model.predict(next_state)
+
+    # IF the game is over, the target Q value is the reward
+    if game_over:
+        current_qvals[action] = target_val
+    else:
+        current_qvals[action] = reward + gamma * max(next_qvals)
+
+    # Train the model on the updated Q values
+    model.train(current_state, current_qvals)
+
+    # Update the current state
+    current_State = next_state
+```
 
 ```mermaid
 graph LR
