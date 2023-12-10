@@ -141,7 +141,7 @@ The neural network used in this project will have 3 outputs. The output would be
 3. Q_Value_Right
 
 ## Forward Propagation
-Forward propagation is the algorithm used to calculate a prediction based on the inputs given to the neural network. To understand how the neural network performs forward propagation, the following diagram of a very simple neural network is shown.
+Forward propagation is the algorithm used to calculate a prediction based on the inputs given to the neural network. To understand how the neural network performs forward propagation, the following diagram of a very simple neural network is shown below
 ```mermaid
 graph LR
    subgraph Input Layer
@@ -193,6 +193,13 @@ graph LR
    H5 -->|w11| O2
    H6 -->|Ww12| O2
 ```
+The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\sigma$ for all layers, one can break down the forward propagation algorithm with the following equations
+
+$$
+h1 = \simga(w1x1 \cdot x2x2 + b1)
+$$
+
+**Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
 
 ## Backward Propagation
 Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training.
