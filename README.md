@@ -198,12 +198,15 @@ The forward propagation algorithm is fairly simple in nature. Each neuron in a h
 $$
 h1 = \sigma(w1x1 \cdot w2x2 + b1)
 $$
+
 $$
 h2 = \sigma(w3x1 \cdot w4x2 + b2)
 $$
+
 $$
 g1 = \sigma(w5h1 \cdot w6h2 + b3)
 $$
+
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
 
 ## Backward Propagation
