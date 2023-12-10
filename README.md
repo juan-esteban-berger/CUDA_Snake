@@ -250,6 +250,10 @@ $$\cdot g2$$
 
 ```python
 print(asdf)
+print(asdf)
+print(asdf)
+print(asdf)
+print(asdf)
 ```
 
 # Cuda Acceleration
