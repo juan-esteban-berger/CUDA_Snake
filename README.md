@@ -196,15 +196,15 @@ graph LR
 The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\sigma$ for all layers, one can break down the forward propagation algorithm with the following equations:
 
 $$
-h1 = \sigma(w1x1 \cdot w2x2 + b1)
+h1 = \sigma(w1 \cdot x1 + w2 \cdot x2 + b1)
 $$
 
 $$
-h2 = \sigma(w3x1 \cdot w4x2 + b2)
+h2 = \sigma(w3 \cdot x1 + w4 \cdot x2 + b2)
 $$
 
 $$
-g1 = \sigma(w5h1 \cdot w6h2 + b3)
+g1 = \sigma(w5 \cdot h1 + w6 \cdot h2 + b3)
 $$
 
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
