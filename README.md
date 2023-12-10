@@ -238,8 +238,6 @@ and the derivative of our loss function is
 
 $$\frac{\partial}{\partial \hat{y_i}} MSE= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} - y_i)$$
 
-$$\frac{\partial MSE}{\partial \hat{y}_i} = \frac{2}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)$$
-
 ## Results
 
 ## Hardware Used
