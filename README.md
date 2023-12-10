@@ -144,37 +144,54 @@ The neural network used in this project will have 3 outputs. The output would be
 Forward propagation is the algorithm used to calculate a prediction based on the inputs given to the neural network. To understand how the neural network performs forward propagation, the following diagram of a very simple neural network is shown.
 ```mermaid
 graph LR
-    subgraph Input Layer
-        I1(Input $w_1$1)
-        I2(Input 2)
-        I3(Input 3)
-    end
+   subgraph Input Layer
+       I1(1)
+       I2(x1)
+       I3(x2)
+   end
 
-    subgraph Hidden Layer
-        H1(Neuron 1)
-        H2(Neuron 2)
-        H3(Neuron 3)
-    end
+   subgraph Hidden Layer 1
+       H1(1)
+       H2(h1)
+       H3(h2)
+   end
 
-    subgraph Output Layer
-        O1(Output)
-    end
+   subgraph Hidden Layer 2
+       H4(1)
+       H5(g1)
+       H6(g2)
+   end
 
-    I1 -->|Weight I1H1| H1
-    I1 -->|Weight I1H2| H2
-    I1 -->|Weight I1H3| H3
+   subgraph Output Layer
+       O1(y1)
+       O2(y2)
 
-    I2 -->|Weight I2H1| H1
-    I2 -->|Weight I2H2| H2
-    I2 -->|Weight I2H3| H3
+   end
 
-    I3 -->|Weight I3H1| H1
-    I3 -->|Weight I3H2| H2
-    I3 -->|Weight I3H3| H3
 
-    H1 -->|Weight H1O1| O1
-    H2 -->|Weight H2O1| O1
-    H3 -->|Weight H3O1| O1
+   I1 -->|b1| H2
+   I2 -->|w1| H2
+   I3 -->|w2| H2
+   
+   I1 -->|b2| H3
+   I2 -->|w3| H3
+   I3 -->|w4| H3
+
+   H1 -->|b3| H5
+   H2 -->|w5| H5
+   H3 -->|w6| H5
+
+   H1 -->|b4| H6
+   H2 -->|w6| H6
+   H3 -->|w8| H6
+
+   H4 -->|b5| O1
+   H5 -->|w9| O1
+   H6 -->|w10| O1
+   
+   H4 -->|b6| O2
+   H5 -->|w11| O2
+   H6 -->|Ww12| O2
 ```
 
 ## Backward Propagation
