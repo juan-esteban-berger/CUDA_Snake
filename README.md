@@ -67,7 +67,7 @@ Bellman Equations
 $$Q_{\text{new}}(s, a) = Q(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q(s', a') - Q(s, a)\right]$$
 
 - $Q_{\text{new}}(s, a)$ is the new $Q$ value for a given state-action pair.
-- $Q(s, a)$ is the current $Q$ value.
+- $Q(s, a)$ is the current $Q$ value given the current state-action pair.
 - $\alpha$ is the learning rate.
 - $R(s, a)$ is the reward received after taking action $a$ in state $s$.
 - $\gamma$ is the discount factor.
