@@ -62,7 +62,9 @@ classDiagram
 ```
 
 ## Deep Reinforcement Learning
+
 ### Bellman Equation
+
 $$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q_{\text{new}}(s', a') - Q_{\text{current}}(s, a)\right]$$
 
 - $Q_{\text{new}}(s, a)$ is the new $Q$ value for a given state-action pair.
@@ -73,7 +75,9 @@ $$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamm
 - $\max_{a'} Q_{\text{new}}(s', a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 
 ### Simplified Bellman Equation
+
 $$Q_{\text{current}}(s) = \text{model.predict}(s)$$
+
 $$Q_{\text{new}}(s) = R + \gamma \max(Q_{\text{current}}(s'))$$
 
 ### Deep Q-Learning Training Algorithm
