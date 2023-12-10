@@ -191,7 +191,7 @@ graph LR
    
    H4 -->|b6| O2
    H5 -->|w11| O2
-   H6 -->|Ww12| O2
+   H6 -->|w12| O2
 ```
 The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\sigma$ for all layers, one can break down the forward propagation algorithm with the following equations:
 
