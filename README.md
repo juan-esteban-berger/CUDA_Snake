@@ -182,7 +182,7 @@ graph LR
    H3 -->|w6| H5
 
    H1 -->|b4| H6
-   H2 -->|w6| H6
+   H2 -->|w7| H6
    H3 -->|w8| H6
 
    H4 -->|b5| O1
@@ -205,6 +205,18 @@ $$
 
 $$
 g1 = \sigma(w5 \cdot h1 + w6 \cdot h2 + b3)
+$$
+
+$$
+g2 = \sigma(w7 \cdot h1 + w8 \cdot h2 + b4)
+$$
+
+$$
+y1 = \sigma(w9 \cdot g1 + w10 \cdot g2 + b5)
+$$
+
+$$
+y2 = \sigma(w11 \cdot g1 + w12 \cdot g2 + b6)
 $$
 
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
