@@ -27,7 +27,26 @@
     - `float* GenerateTargets()`: Generates targets for training.
     - `void ShortTermTraining()`: Trains the Agent every single move, do not uses GPU acceleration.
     - `void LongTermTraining()`: Trains the Agent every specified number of moves, uses GPU acceleration.
-<img src="mermaid_outputs/game_class.png" alt="game_class" width="200">
+```mermaid
+classDiagram
+    class Game {
+        int** Board
+        int* SnakeX
+        int* SnakeY
+        int FoodX
+        int FoodY
+        bool State
+        void Initialize()
+        int UserInput()
+        int AgentInput()
+        void Logic()
+        void Render()
+        float* GenerateFeatures()
+        float* GenerateTargets()
+        void ShortTermTraining()
+        void LongTermTraining()
+    }
+```
 
 ## Layer Class
 - Attributes:
