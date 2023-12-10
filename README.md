@@ -222,7 +222,23 @@ $$
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
 
 ## Backward Propagation
-Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training.
+Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training. For the sake of explanation, lets assume that our activation function is
+
+$$
+\sigma(x) = \frac{1}{1 + e^(-x)}
+$$
+
+and that the derivative of our activation function is
+
+$$
+\frac{d}{dx}\sigma(x) = \sigma(x) \cdot (1 - \sigma(x))
+$$
+
+and our loss function is
+
+$$ MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$
+
+$$ \frac{\partial MSE}{\partial \hat{y}_i} = \frac{2}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i) $$
 
 ## Results
 
