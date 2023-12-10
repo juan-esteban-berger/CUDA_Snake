@@ -135,7 +135,7 @@ The model used in deep reinforcement learning is a simple fully connected feed-f
 12. Food_RIGHT: Binary flag indicating if the food is to the right of the snake.
 
 ## Neural Network Outputs
-The neural network used in this project will have 3 outputs. The output would be one q_value corresponding to each of the four directions the snake can move, given the current game state the snake is in. At the beginning of training, the snake will make random moves, but will later use the neural network to determine its next move. The outputs to the neural network are the following:
+The neural network used in this project will have 3 outputs. The output would be one q_value corresponding to each of the four directions the snake can move, given the current game state the snake is in. At the beginning of training, the snake will make random moves, but after a specified number of training iterations, the neural network to determine its next move. The outputs to the neural network are the following:
 1. Q_Value_UP
 2. Q_Value_Left
 3. Q_Value_Right
@@ -145,7 +145,7 @@ Forward propagation is the algorithm used to calculate a prediction based on the
 ```mermaid
 graph LR
     subgraph Input Layer
-        I1(Input 1)
+        I1(Input $w_1$1)
         I2(Input 2)
         I3(Input 3)
     end
