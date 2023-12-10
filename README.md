@@ -13,6 +13,7 @@
 ```mermaid
 classDiagram
     class Game {
+        int moveDelay
         int** Board
         int* SnakeX
         int* SnakeY
@@ -115,6 +116,8 @@ while not game_over:
     current_State = next_state
 ```
 
+## Forward Propagation
+
 ```mermaid
 graph LR
     subgraph Input Layer
@@ -149,6 +152,8 @@ graph LR
     H2 -->|Weight H2O1| O1
     H3 -->|Weight H3O1| O1
 ```
+
+# Backward Propagation
 
 ## Hardware Used
 - Saturn Cloud... Google Colab, etc???
