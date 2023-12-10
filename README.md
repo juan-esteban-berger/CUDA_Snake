@@ -242,7 +242,9 @@ The backpropagation algorithm calculates the derivative of the loss with respect
 
 $$\frac{\partial}{\partial w_{12}} MSE = \frac{2}{n} \sum_{i=1}^n (y_i - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
 
-$$\cdot \sigma(w11 \cdot g1 + w12 \cdot g2 + b6) \\ \cdot (1 - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
+$$\cdot \sigma(w11 \cdot g1 + w12 \cdot g2 + b6)$$
+
+$$\cdot (1 - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
 
 $$\cdot g2$$
 
