@@ -116,25 +116,26 @@ while not game_over:
 ```
 *Note: Apart from training the AI Agent after every move, the AI Agent will also take advantage of GPU acceleration with CUDA every n moves with a larger batch of training examples.*
 
-## Training Features
+## Neural Network Inputs
 The model used in deep reinforcement learning is a simple fully connected feed-forward neural network. This neural network collects the following 12 features after every move:
-1. Danger_UP: Binary flag indicating if there is a wall directly above the snake's head.
-2. Danger_DOWN: Binary flag indicating if there is a wall directly below the snake's tail.
-3. Danger_LEFT: Binary flag indicating if there is a wall to the immediate left of the snake's head.
-4. Danger_RIGHT: Binary flag indicating if there is a wall to the immediate right of the snake's head.
+1. Danger_UP: Binary flag indicating if there is a wall or a part of the snake directly above the snake's head.
+2. Danger_DOWN: Binary flag indicating if there is a wall or a part of the snake directly below the snake's tail.
+3. Danger_LEFT: Binary flag indicating if there is a wall or a part of the snake to the immediate left of the snake's head.
+4. Danger_RIGHT: Binary flag indicating if there is a wall or a part of the snake to the immediate right of the snake's head.
 5. Direction_UP: Binary flag indicating if the snake is currently moving up.
 6. Direction_DOWN: Binary flag indicating if the snake is currently moving down.
 7. Direction_LEFT: Binary flag indicating if the snake is currently moving left.
 8. Direction_RIGHT: Binary flag indicating if the snake is currently moving right.
-9. Food_UP: Distance (normalized between 0 and 1) between the food and the top of the game board.
-10. Food_DOWN: Distance (normalized between 0 and 1) between the food and the bottom of the game board.
-11. Food_LEFT: Distance (normalized between 0 and 1) between the food and the left edge of the game board.
-12. Food_RIGHT: Distance (normalized between 0 and 1) between the food and the right edge of the game board. 
+9. Food_UP: Binary flag indicating if the food is above the snake.
+10. Food_DOWN: Binary flag indicating if the food is below the snake.
+11. Food_LEFT: Binary flag indicating if the food is to the left the snake.
+12. Food_RIGHT: Binary flag indicating if the food is to the right the snake.
 
-## Training Targets
+## Neural Network Outputs
+The neural network used in this project will have 4 outputs. The output would be one q_value corresponding to each of the four directions the snake can move, given the current game state the snake is in. At the beginning of training, the snake will make random moves, but will later use the neural network in order to determine its next move.
 
 ## Forward Propagation
-
+Forward propagation is the algorithm used to calculate a prediction based on the inputs given to the neural network. To understand how the neural network performs forward propagation, the following diagram of a very simple neural network is shown.
 ```mermaid
 graph LR
     subgraph Input Layer
@@ -171,6 +172,7 @@ graph LR
 ```
 
 ## Backward Propagation
+Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training.
 
 ## Results
 
