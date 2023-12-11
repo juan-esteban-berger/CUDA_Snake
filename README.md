@@ -66,13 +66,13 @@ classDiagram
 ### Bellman Equation
 
 $$
-Q_{\text{updated}}(s,a) = Q(s,a) + \alpha \cdot \left[R(s,a) + gamma \cdot \text{max}_{a'} \cdot Q(s',a') - Q(s,a)\right]
+Q_{\text{updated}}(s,a) = Q(s,a) + \alpha \cdot \left[R(s,a) + \gamma \cdot \text{max}_{a'} \cdot Q(s',a') - Q(s,a)\right]
 $$
 
 where
 - $Q_{\text{updated}}(s,a)$ is updated q_value for the current state-action pair.
 - $Q(s,a)$ is the current q_value for the next state-action pair.
-- $text{max}_{a'}Q(s',a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
+- $\text{max}_{a'}Q(s',a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 - $\alpha$ is the learning rate.
 - $R(s,a)$ is the reward received after taking action $a$ in state $s$.
 - $\gamma$ is the discount factor.
