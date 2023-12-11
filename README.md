@@ -218,7 +218,7 @@ g_2 = \text{relu}(w_7 h_1 + w_8 h_2 + b_4)
 $$
 
 $$
-y_1 = \text}{relu}(w_9 g_1 + w_{10} g_2 + b_5)
+y_1 = \text{relu}(w_9 g_1 + w_{10} g_2 + b_5)
 $$
 
 $$
