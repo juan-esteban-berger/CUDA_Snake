@@ -247,6 +247,7 @@ $$\frac{\partial}{\partial \hat{y_i}} MSE(y, \hat{y})= \frac{2}{n} \sum_{i=1}^n 
 The backpropagation algorithm calculates the derivative of the loss with respect to each weight. This algorithm starts by calculating the derivatives for the weights of the last layer, and then uses those results to calculate the derivatives of the weights in previous layers. The reason for doing this is that since forward propagation uses compositive functions, their derivatives can be calculated using the chain rule. Calculating the derivative of the loss with respect to a weight on the last layer can be calculated as follow
 
 the chain rule representation of the equation in terms of the derivative of the loss is
+
 $$
 \frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial w_{12}} MSE(y_1, \hat{y_1}) + \frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2})
 $$
