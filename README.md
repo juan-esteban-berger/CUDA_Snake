@@ -261,7 +261,7 @@ $$
 
 which can be expanded to
 
-$$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \relu w_{11}g_1 + w_{12}g_2 + b_6))$$
+$$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu} w_{11}g_1 + w_{12}g_2 + b_6))$$
 
 $$\times \frac{\partial}{\partial} \text{relu}(w_{11} g_{1} + w_{12} g_2 + b_6)$$
 
