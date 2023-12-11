@@ -78,7 +78,7 @@ $$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamm
 
 $$Q_{\text{current}}(s) = \text{model.predict}(s)$$
 
-$$Q_{\text{new}}(s) = R + \gamma \cdot \max_{a'}(Q_{\text{current}}(s'))$$
+$$Q_{\text{new}}(s) = R + \gamma \cdot \max_{a'}Q_{\text{current}}(s')$$
 
 ### Deep Q-Learning Training Algorithm
 ```python
