@@ -259,7 +259,6 @@ $$\times g_2$$
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
 $$
-
 \frac{\partial}{\partial w_{12}} MSE = \frac{\partial}{\partial w_{12}} MSE(y_1, \hat{y_1}) + \frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2})
 $$
 
