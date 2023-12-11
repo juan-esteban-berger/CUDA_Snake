@@ -280,7 +280,7 @@ $$
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
 $$
-\frac{\partial}{\partial w_{12}} MSE(Y, \hat{Y}) = \frac{\partial}{\partial \hat{w_{12}}} MSE(y_2, \hat{y_2}) + \frac{\partial}{\partial {w_{12}}} + MSE(y_1, \hat{y_1})
+\frac{\partial}{\partial w_{12}} MSE(Y, \hat{Y}) = \frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) + \frac{\partial}{\partial {w_{12}}} + MSE(y_1, \hat{y_1})
 $$
 
 Since this behavior is repeated for every layer, the backpropagation algorithm can be generalized as follows:
