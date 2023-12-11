@@ -72,16 +72,16 @@ $$
 where
 - $Q_{\text{updated}}(s,a)$ is updated q_value for the current state-action pair.
 - $Q(s,a)$ is the current q_value for the next state-action pair.
-- $\text{max}_{a'}Q(s',a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
+- $\text{max}_{a'}Q(s',a')$ is the maximum expected future reward observed at the next-state $s'$, across all possible actions $a'$.
 - $\alpha$ is the learning rate.
 - $R(s,a)$ is the reward received after taking action $a$ in state $s$.
 - $\gamma$ is the discount factor.
 
 ### Simplified Bellman Equation
 
-$$Q_{\text{current}}(s,a) = \text{model.predict}(s)$$
+$$Q(s,a) = \text{model.predict}(s,a)$$
 
-$$Q_{\text{new}}(s) = R + \gamma \cdot \max_{a'}Q_{\text{current}}(s')$$
+$$Q_{updated}(s,a) = R + \gamma \cdot \max_{a'}Q(s',a')$$
 
 ### Deep Q-Learning Training Algorithm
 ```python
