@@ -279,6 +279,13 @@ $$
 \frac{\partial}{\partial w_{8}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4) } \hat{y_2} \times \frac{\partial}{\partial w_{8}} (w_{7} h_{1} + w_{8} h_2 + b_4)
 $$
 
+which can be expanded to
+
+$$\frac{\partial}{\partial w_{8}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu}(w_{11}g_1 + w_{12}g_2 + b_6))$$
+
+$$\times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4)} \text{relu}(w_{7} h_{1} + w_{8} h_2 + b_4)$$
+
+$$\times h_2$$
 
 ```python
 def backpropagation():
