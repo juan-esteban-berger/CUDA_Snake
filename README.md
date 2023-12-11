@@ -265,7 +265,7 @@ $$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^
 
 $$\times \frac{\partial}{\partial g_2} \text{relu}(w_{11} g_{1} + w_{12} g_2 + b_6)$$
 
-$$\times w_{12}$$
+$$\times g_2$$
 
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
