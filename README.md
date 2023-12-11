@@ -199,30 +199,30 @@ graph LR
    H5 -->|w11| O2
    H6 -->|w12| O2
 ```
-The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\sigma$ for all layers, one can break down the forward propagation algorithm with the following equations:
+The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\text{relu}$ for all layers, one can break down the forward propagation algorithm with the following equations:
 
 $$
-h_1 = \sigma(w_1 x_1 + w_2 x_2 + b_1)
-$$
-
-$$
-h_2 = \sigma(w_3 x_1 + w_4 x_2 + b_2)
+h_1 = \text{relu}(w_1 x_1 + w_2 x_2 + b_1)
 $$
 
 $$
-g_1 = \sigma(w_5 h_1 + w_6 h_2 + b_3)
+h_2 = \text{relu}(w_3 x_1 + w_4 x_2 + b_2)
 $$
 
 $$
-g_2 = \sigma(w_7 h_1 + w_8 h_2 + b_4)
+g_1 = \text{relu}(w_5 h_1 + w_6 h_2 + b_3)
 $$
 
 $$
-y_1 = \sigma(w_9 g_1 + w_{10} g_2 + b_5)
+g_2 = \text{relu}(w_7 h_1 + w_8 h_2 + b_4)
 $$
 
 $$
-y_2 = \sigma(w_{11} g_1 + w_{12} g_2 + b_6)
+y_1 = \text}{relu}(w_9 g_1 + w_{10} g_2 + b_5)
+$$
+
+$$
+y_2 = \text{relu}(w_{11} g_1 + w_{12} g_2 + b_6)
 $$
 
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
@@ -261,7 +261,7 @@ $$
 
 which can be expanded to
 
-$$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu} w_{11}g_1 + w_{12}g_2 + b_6))$$
+$$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu}(w_{11}g_1 + w_{12}g_2 + b_6))$$
 
 $$\times \frac{\partial}{\partial} \text{relu}(w_{11} g_{1} + w_{12} g_2 + b_6)$$
 
