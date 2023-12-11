@@ -283,3 +283,4 @@ def backpropagation():
 ## References
 - Patric Loeber's PyGame inspiration
 - https://www.freecodecamp.org/news/diving-deeper-into-reinforcement-learning-with-q-learning-c18d0db58efe/
+- https://www.youtube.com/watch?v=kbGu60QBx2o&t=760s
