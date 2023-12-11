@@ -81,7 +81,7 @@ where
 
 $$Q(s,a) = \text{model.predict}(s,a)$$
 
-$$Q_{updated}(s,a) = R + \gamma \cdot \max_{a'}Q(s',a')$$
+$$Q_{\text{updated}}(s,a) = R + \gamma \cdot \max_{a'}Q(s',a')$$
 
 ### Deep Q-Learning Training Algorithm
 ```python
