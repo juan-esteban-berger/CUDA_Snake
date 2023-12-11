@@ -249,11 +249,7 @@ $$\cdot (1 - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
 $$\cdot g2$$
 
 ```python
-print(asdf)
-print(asdf)
-print(asdf)
-print(asdf)
-print(asdf)
+
 ```
 
 # Cuda Acceleration
