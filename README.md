@@ -293,17 +293,26 @@ class Layer:
         self.outputs += self.biases
         # Pass the weighted sum through the activation function
         self.outputs = self.activation_function(self.outputs)
+        # Return the output
         return self.output
 
+    # Backward Pass Function
     def backward_pass(self, gradients):
         # Save the gradients for the next layer
         self.gradients = gradients
-        # Calculate the gradients of the weights and biases
-        self.weights_gradients = np.dot(self.input.T, gradients * self.activation_function_derivative(self.output))
-        # Calculate the gradients of the biases
-        self.biases_gradients = np.sum(gradients * self.activation_function_derivative(self.output), axis=0)
-        # Calculate the gradients of the inputs
-        self.gradients = np.dot(gradients * self.activation_function_derivative(self.output), self.weights.T)
+        # Calculate the gradients for the weights
+        self.weights_gradients = self.activation_function_derivative(self.output)
+        self.weights_gradients = gradients * self.weights_gradients
+        self.weights_gradients = np.dot(self.input.T, self.weights_gradients)
+        # Calculate the gradients for the biases
+        self.biases_gradients = self.activation_function_derivative(self.output)
+        self.biases_gradients = gradients * self.biases_gradients
+        self.biases_gradients = np.sum(self.biases_gradients, axis=0)
+        # Calculate the gradients for the previous layer
+        self.gradients = self.activation_function_derivative(self.output)
+        self.gradients = gradients * self.gradients
+        self.gradients = np.dot(self.gradients, self.weights.T)
+        # Return the gradients
         return self.gradients
 
 class NeuralNetwork:
@@ -324,7 +333,7 @@ class NeuralNetwork:
         for layer in reversed(self.layers):
             gradients = layer.backward_pass(gradients)
 
-        # Update Weights and Biases
+        # Update Weights and Biases using Gradient Descent
         for layer in self.layers:
             layer.weights -= self.learning_rate * layer.weights_gradients
             layer.biases -= self.learning_rate * layer.biases_gradients
