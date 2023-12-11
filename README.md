@@ -83,6 +83,8 @@ $$Q(s,a) = \text{model.predict}(s,a)$$
 
 $$Q_{\text{updated}}(s,a) = R + \gamma \cdot \max_{a'}Q(s',a')$$
 
+*Note: The simplified Bellman Equation is equivalent to the case where $\alpha = 1$.*
+
 ### Deep Q-Learning Training Algorithm
 ```python
 while not game_over:
@@ -95,6 +97,9 @@ while not game_over:
     # Choose an action based on current q_values
     # Could be at random at the beginning of the highest q-value later in training
     action = choose_action(current_qvals)
+
+    # Calculate Reward
+    reward = calculateReward()
 
     # Update game_over value depending on what happened with the last action
     game_over = updateGameOver()
@@ -110,16 +115,14 @@ while not game_over:
 
     # IF the game is over, the target Q value is the reward
     if game_over:
-        current_qvals[action] = target_val
+        current_qvals[action] = reward
     else:
         current_qvals[action] = reward + gamma * max(next_qvals)
 
     # Train the model on the updated Q values
     model.train(current_state, current_qvals)
-
-    # Update the current state
-    current_State = next_state
 ```
+
 *Note: Apart from training the AI Agent after every move, the AI Agent will also take advantage of GPU acceleration with CUDA every n moves with a larger batch of training examples.*
 
 ## Neural Network Inputs
