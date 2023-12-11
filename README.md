@@ -202,27 +202,27 @@ graph LR
 The forward propagation algorithm is fairly simple in nature. Each neuron in a hidden layer (denoted by $h$ and $g$) in the illustration above takes in the weighted sum of each input, adds the bias term, and then passes it through an activation function. Given an activation function $\sigma$ for all layers, one can break down the forward propagation algorithm with the following equations:
 
 $$
-h_1 = \sigma(w_1 \cdot x_1 + w_2 \cdot x_2 + b_1)
+h_1 = \sigma(w_1 x_1 + w_2 x_2 + b_1)
 $$
 
 $$
-h_2 = \sigma(w_3 \cdot x_1 + w_4 \cdot x_2 + b_2)
+h_2 = \sigma(w_3 x_1 + w_4 x_2 + b_2)
 $$
 
 $$
-g_1 = \sigma(w_5 \cdot h_1 + w_6 \cdot h_2 + b_3)
+g_1 = \sigma(w_5 h_1 + w_6 h_2 + b_3)
 $$
 
 $$
-g_2 = \sigma(w_7 \cdot h_1 + w_8 \cdot h_2 + b_4)
+g_2 = \sigma(w_7 h_1 + w_8 h_2 + b_4)
 $$
 
 $$
-y_1 = \sigma(w_9 \cdot g_1 + w_{10} \cdot g_2 + b_5)
+y_1 = \sigma(w_9 g_1 + w_{10} g_2 + b_5)
 $$
 
 $$
-y_2 = \sigma(w_{11} \cdot g_1 + w_{12} \cdot g_2 + b_6)
+y_2 = \sigma(w_{11} g_1 + w_{12} g_2 + b_6)
 $$
 
 **Note: A neural network that is as small as the one visualized above, can easily be broken down with equations, but it is nearly impossible to do so with practical neural networks that have millions of weights and biases.**
@@ -230,11 +230,11 @@ $$
 ## Backward Propagation
 Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training. For the sake of explanation, lets assume that our activation function is
 
-$$\sigma(x) = \frac{1}{1 + e^(-x)}$$
+$$\sigma(x) = \frac{1}{1 + e^{-x}}$$
 
 and that the derivative of our activation function is
 
-$$\frac{d}{dx}\sigma(x) = \sigma(x) \cdot (1 - \sigma(x))$$
+$$\frac{d}{dx}\sigma(x) = \sigma(x) (1 - \sigma(x))$$
 
 and our loss function is
 
@@ -246,16 +246,16 @@ $$\frac{\partial}{\partial \hat{y_i}} MSE= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} -
 
 The backpropagation algorithm calculates the derivative of the loss with respect to each weight. This algorithm starts by calculating the derivatives for the weights of the last layer, and then uses those results to calculate the derivatives of the weights in previous layers. The reason for doing this is that since forward propagation uses compositive functions, their derivatives can be calculated using the chain rule. This algorithm can be explained with the equations below:
 
-$$\frac{\partial}{\partial w_{12}} MSE = \frac{2}{n} \sum_{i=1}^n (y_i - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
+$$\frac{\partial}{\partial w_{12}} MSE = \frac{2}{n} \sum_{i=1}^n (y_i - \sigma(w11 g1 + w12 g2 + b6))$$
 
-$$\cdot \sigma(w11 \cdot g1 + w12 \cdot g2 + b6)$$
+$$\times \sigma(w11 g1 + w12 g2 + b6)$$
 
-$$\cdot (1 - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
+$$\times (1 - \sigma(w11 \cdot g1 + w12 \cdot g2 + b6))$$
 
-$$\cdot g2$$
+$$\times g2$$
 
 ```python
-
+def backpropagation():
 ```
 
 # Cuda Acceleration
