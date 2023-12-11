@@ -65,9 +65,9 @@ classDiagram
 
 ### Bellman Equation
 
-$$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamma \max_{a'} Q_{\text{new}}(s', a') - Q_{\text{current}}(s, a)\right]$$
+$$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamma \cdot \max_{a'} Q_{\text{new}}(s', a') - Q_{\text{current}}(s, a)\right]$$
 
-- $Q_{\text{new}}(s, a)$ is the new $Q$ value for a given state-action pair.
+- $Q_{\text{new}}(s, a)$ is the updated $Q$ value for the current state-action pair.
 - $Q_{\text{current}}(s, a)$ is the current $Q$ value for the current state-action pair.
 - $\alpha$ is the learning rate.
 - $R(s, a)$ is the reward received after taking action $a$ in state $s$.
@@ -78,7 +78,7 @@ $$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamm
 
 $$Q_{\text{current}}(s) = \text{model.predict}(s)$$
 
-$$Q_{\text{new}}(s) = R + \gamma \max(Q_{\text{current}}(s'))$$
+$$Q_{\text{new}}(s) = R + \gamma \cdot \max_{a'}(Q_{\text{current}}(s'))$$
 
 ### Deep Q-Learning Training Algorithm
 ```python
