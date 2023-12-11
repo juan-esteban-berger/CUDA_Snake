@@ -324,11 +324,13 @@ def train(inputs, outputs):
     # Backward Propagation
     for layer in reversed(layers):
         # Backward Pass
-        weights_gradients, biases_gradients, outputs_gradients = backward_pass(
-            output_gradients)
+        layer[weights_gradients], layer[biases_gradients], layer[outputs_gradients] = backward_pass(output_gradients)
+
+    # Update Weights and Biases using Gradient Descent
+    for layer in layers:
         # Update Weights and Biases
-        layer[weights] -= learning_rate * weights_gradients
-        layer[biases] -= learning_rate * biases_gradients
+        layer[weights] -= learning_rate * layer[weights_gradients]
+        layer[biases] -= learning_rate * layer[biases_gradients]
 ```
 
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
