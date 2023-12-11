@@ -280,7 +280,54 @@ $$
 Since this behavior repeats itself in every layer, the backpropagation algorithm can be generalized as follows:
 
 ```python
-def backpropagation():
+# Layer Class
+class Layer:
+    ...
+    # Forward Pass Function
+    def forward_pass(self, input):
+        # Save the input for the backward pass
+        self.input = input
+        # Calculate the weighted sum of the inputs
+        self.outputs = np.dot(input, self.weights)
+        # Add the biases to the weighted sum
+        self.outputs += self.biases
+        # Pass the weighted sum through the activation function
+        self.outputs = self.activation_function(self.outputs)
+        return self.output
+
+    def backward_pass(self, gradients):
+        # Save the gradients for the next layer
+        self.gradients = gradients
+        # Calculate the gradients of the weights and biases
+        self.weights_gradients = np.dot(self.input.T, gradients * self.activation_function_derivative(self.output))
+        # Calculate the gradients of the biases
+        self.biases_gradients = np.sum(gradients * self.activation_function_derivative(self.output), axis=0)
+        # Calculate the gradients of the inputs
+        self.gradients = np.dot(gradients * self.activation_function_derivative(self.output), self.weights.T)
+        return self.gradients
+
+class NeuralNetwork:
+    ...
+    def train(self, input, target):
+        # Forward Pass
+        output = input
+        for layer in self.layers:
+            output = layer.forward_pass(output)
+
+        # Calculate Loss
+        loss = self.loss_function(output, target)
+
+        # Calculate Gradients
+        gradients = self.loss_function_derivative(output, target)
+
+        # Backward Pass
+        for layer in reversed(self.layers):
+            gradients = layer.backward_pass(gradients)
+
+        # Update Weights and Biases
+        for layer in self.layers:
+            layer.weights -= self.learning_rate * layer.weights_gradients
+            layer.biases -= self.learning_rate * layer.biases_gradients
 ```
 
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
