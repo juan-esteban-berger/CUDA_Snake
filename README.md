@@ -280,63 +280,55 @@ $$
 Since this behavior repeats itself in every layer, the backpropagation algorithm can be generalized as follows:
 
 ```python
-# Layer Class
-class Layer:
-    ...
-    # Forward Pass Function
-    def forward_pass(self, input):
-        # Save the input for the backward pass
-        self.input = input
-        # Calculate the weighted sum of the inputs
-        self.outputs = np.dot(input, self.weights)
-        # Add the biases to the weighted sum
-        self.outputs += self.biases
-        # Pass the weighted sum through the activation function
-        self.outputs = self.activation_function(self.outputs)
-        # Return the output
-        return self.output
+# Forward Pass Function
+def forward_pass(inputs):
+    # Calculate the weighted sum of the inputs
+    predictions = np.dot(inputs, weights)
+    # Add the biases to the weighted sum
+    predictions += biases
+    # Pass the weighted sum through the activation function
+    predictions = activation_function(predictions)
+    # Return the predictions
+    return predictions
 
-    # Backward Pass Function
-    def backward_pass(self, gradients):
-        # Save the gradients for the next layer
-        self.gradients = gradients
-        # Calculate the gradients for the weights
-        self.weights_gradients = self.activation_function_derivative(self.output)
-        self.weights_gradients = gradients * self.weights_gradients
-        self.weights_gradients = np.dot(self.input.T, self.weights_gradients)
-        # Calculate the gradients for the biases
-        self.biases_gradients = self.activation_function_derivative(self.output)
-        self.biases_gradients = gradients * self.biases_gradients
-        self.biases_gradients = np.sum(self.biases_gradients, axis=0)
-        # Calculate the gradients for the previous layer
-        self.gradients = self.activation_function_derivative(self.output)
-        self.gradients = gradients * self.gradients
-        self.gradients = np.dot(self.gradients, self.weights.T)
-        # Return the gradients
-        return self.gradients
+# Backward Pass Function
+def backward_pass(self, output_gradients):
+    # Calculate the gradients for the weights
+    weights_gradients = activation_function_derivative(self.output)
+    weights_gradients = gradients * weights_gradients
+    weights_gradients = np.dot(self.input.T, weights_gradients)
+    # Calculate the gradients for the biases
+    biases_gradients = activation_function_derivative(self.output)
+    biases_gradients = gradients * biases_gradients
+    biases_gradients = np.sum(biases_gradients, axis=0)
+    # Calculate the gradients for the outputs
+    outputs_gradients = activation_function_derivative(self.output)
+    outputs_gradients = gradients * outputs_gradients
+    outputs_gradients = np.dot(outputs_gradients, self.weights.T)
+    # Return the gradients
+    return weights_gradients, biases_gradients, outputs_gradients
 
-class NeuralNetwork:
-    ...
-    def train(self, input, target):
+def train(inputs, outputs):
+    # Forward Propagation
+    predictions = inputs
+    for layer in layers:
         # Forward Pass
-        output = input
-        for layer in self.layers:
-            output = layer.forward_pass(output)
+        predictions = forward_pass(predictions)
 
-        # Calculate Loss
-        loss = self.loss_function(output, target)
+    # Calculate Loss
+    loss = loss_function(predictions, outputs)
 
-        # Calculate Gradients
-        gradients = self.loss_function_derivative(output, target)
+    # Calculate Gradients of Loss Function with respect to predictions
+    output_gradients = loss_function_derivative(predictions, outputs)
 
+    # Backward Propagation
+    for layer in reversed(layers):
         # Backward Pass
-        for layer in reversed(self.layers):
-            gradients = layer.backward_pass(gradients)
-
-        # Update Weights and Biases using Gradient Descent
-        for layer in self.layers:
-            layer.weights -= self.learning_rate * layer.weights_gradients
-            layer.biases -= self.learning_rate * layer.biases_gradients
+        weights_gradients, biases_gradients, outputs_gradients = backward_pass(
+            output_gradients)
+        # Update Weights and Biases
+        layer[weights] -= learning_rate * weights_gradients
+        layer[biases] -= learning_rate * biases_gradients
 ```
 
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
