@@ -254,7 +254,7 @@ which can be expanded to
 
 $$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \sigma(w_{11}g_1 + w_{12}g_2 + b_6))$$
 
-$$\times \sigma(w_{11} g_{1} + w_{12} g_2 + b_6) \times (1 - \sigma(w_{11} g_1 + w_{12} g_2 + b_6))$$
+$$\times \sigma(w_{11} g_{1} + w_{12} g_2 + b_6)(1 - \sigma(w_{11} g_1 + w_{12} g_2 + b_6))$$
 
 $$\times w_{12}$$
 
