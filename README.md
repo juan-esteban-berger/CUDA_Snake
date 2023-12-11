@@ -249,7 +249,7 @@ The backpropagation algorithm calculates the derivative of the loss with respect
 Chain Rule:
 
 $$
-\frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \cdot \frac{\partial}{\partial g_2} y_2
+\frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial g_2} y_2 \times \frac{\partial}{\partial w_{12}} g_2
 $$
 
 which can be expanded to
