@@ -292,7 +292,7 @@ def forward_pass(inputs):
     return predictions
 
 # Backward Pass Function
-def backward_pass(self, output_gradients):
+def backward_pass(output_gradients):
     # Calculate the gradients for the weights
     weights_gradients = activation_function_derivative(self.output)
     weights_gradients = gradients * weights_gradients
