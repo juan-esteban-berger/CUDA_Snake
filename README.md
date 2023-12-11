@@ -231,7 +231,7 @@ $$
 Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training. For the sake of explanation, lets assume that our activation function is
 
 $$
-relu(x) = \\begin{cases}
+\text{relu}(x) = \\begin{cases}
 0 & \\text{if } x < 0 \\\\
 x & \\text{if } x \\ge 0
 \\end{cases}
