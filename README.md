@@ -65,18 +65,21 @@ classDiagram
 
 ### Bellman Equation
 
-$$Q_{\text{new}}(s, a) = Q_{\text{current}}(s, a) + \alpha \left[R(s, a) + \gamma \cdot \max_{a'} Q_{\text{new}}(s', a') - Q_{\text{current}}(s, a)\right]$$
+$$
+Q_{\text{updated}}(s,a) = Q(s,a) + \alpha \cdot \left[R(s,a) + gamma \cdot \text{max}_{a'} \cdot Q(s',a') - Q(s,a)\right]
+$$
 
-- $Q_{\text{new}}(s, a)$ is the updated $Q$ value for the current state-action pair.
-- $Q_{\text{current}}(s, a)$ is the current $Q$ value for the current state-action pair.
+where
+- $Q_{\text{updated}}(s,a)$ is updated q_value for the current state-action pair.
+- $Q(s,a)$ is the current q_value for the next state-action pair.
+- $text{max}_{a'}Q(s',a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 - $\alpha$ is the learning rate.
-- $R(s, a)$ is the reward received after taking action $a$ in state $s$.
+- $R(s,a)$ is the reward received after taking action $a$ in state $s$.
 - $\gamma$ is the discount factor.
-- $\max_{a'} Q_{\text{new}}(s', a')$ is the maximum expected future reward observed at the new state $s'$, across all possible actions $a'$.
 
 ### Simplified Bellman Equation
 
-$$Q_{\text{current}}(s) = \text{model.predict}(s)$$
+$$Q_{\text{current}}(s,a) = \text{model.predict}(s)$$
 
 $$Q_{\text{new}}(s) = R + \gamma \cdot \max_{a'}Q_{\text{current}}(s')$$
 
@@ -261,4 +264,4 @@ $$\cdot g2$$
 
 ## References
 - Patric Loeber's PyGame inspiration
-- CUDA course by...
+- https://www.freecodecamp.org/news/diving-deeper-into-reinforcement-learning-with-q-learning-c18d0db58efe/
