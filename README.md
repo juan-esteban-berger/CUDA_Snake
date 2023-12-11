@@ -276,7 +276,7 @@ $$
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
 $$
-\frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial w_{12}} MSE(y_1, \hat{y_1}) + \frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2})
+\frac{\partial}{\partial w_{8}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4) } \hat{y_2} \times \frac{\partial}{\partial w_{8}} (w_{7} h_{1} + w_{8} h_2 + b_4)
 $$
 
 
