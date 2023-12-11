@@ -270,11 +270,11 @@ $$\times g_2$$
 Calculating the derivative of the loss with respect to a weight on the second to last layer can be calculated as follow
 
 $$
-\frac{\partial}{\partial w_8} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_8} (w_{11} g_{1} + w_{12} g_2 + b_6)
+\frac{\partial}{\partial w_8} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_{12}} (w_{11} g_{1} + w_{12} g_2 + b_6)
 $$
 
 $$
-\times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4)} g_2 \times \frac{\partial}{\partial w_{12}} (w_{7} h_{1} + w_{8} h_2 + b_4)
+\times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4)} g_2 \times \frac{\partial}{\partial w_8} (w_{7} h_{1} + w_{8} h_2 + b_4)
 $$
 
 Since this behavior repeats itself in every layer, the backpropagation algorithm can be generalized as follows:
