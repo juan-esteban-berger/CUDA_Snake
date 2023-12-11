@@ -232,14 +232,18 @@ Backward Propagation is the algorithm used to update the Neural Network's weight
 
 $$
 \text{relu}(x) = \\begin{cases}
-0 & \\text{if } x < 0 \\\\
 x & \\text{if } x \\ge 0
+0 & \\text{if } x < 0 \\\\
 \\end{cases}
 $$
 
 and that the derivative of our activation function is
 
-$$\frac{d}{dx}\sigma(x) = \sigma(x) (1 - \sigma(x))$$
+$$
+\frac{d}{dx}\text{relu}(x) = \\begin{cases}
+1 & \\text{if } x \\ge 0
+0 & \\text{if } x < 0 \\\\  
+\\end{cases}$$
 
 and our loss function is
 
