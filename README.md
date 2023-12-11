@@ -230,7 +230,12 @@ $$
 ## Backward Propagation
 Backward Propagation is the algorithm used to update the Neural Network's weights and biases such that they minimize the loss through multiple epochs of training. For the sake of explanation, lets assume that our activation function is
 
-$$\sigma(x) = \frac{1}{1 + e^{-x}}$$
+$$
+relu(x) = \\begin{cases}
+0 & \\text{if } x < 0 \\\\
+x & \\text{if } x \\ge 0
+\\end{cases}
+$$
 
 and that the derivative of our activation function is
 
@@ -244,7 +249,7 @@ and the derivative of our loss function is
 
 $$\frac{\partial}{\partial \hat{y_i}} MSE(y, \hat{y})= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} - y_i)$$
 
-The backpropagation algorithm calculates the derivative of the loss with respect to each weight. This algorithm starts by calculating the derivatives for the weights of the last layer, and then uses those results to calculate the derivatives of the weights in previous layers. The reason for doing this is that since forward propagation uses compositive functions, their derivatives can be calculated using the chain rule. Calculating the derivative of the loss with respect to a weight on the last layer can be calculated as follow
+The backpropagation algorithm calculates the derivative of the loss with respect to each weight. This algorithm starts by calculating the derivatives for the weights of the last layer, and then uses those results to calculate the derivatives of the weights in previous layers. The reason for calculating weights starting from the last layers is that forward propagation uses compositive functions which allows  us to calculate the gradients using the chain rule. Calculating the derivative of the loss with respect to a weight on the last layer can be calculated as follow
 
 $$
 \frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial g_2} y_2 \times \frac{\partial}{\partial w_{12}} g_2
@@ -256,7 +261,7 @@ $$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^
 
 $$\times \sigma(w_{11} g_{1} + w_{12} g_2 + b_6)(1 - \sigma(w_{11} g_1 + w_{12} g_2 + b_6))$$
 
-$$\times \frac{\partial}{\partial w_{12}} (w_{11} g_1 + w_{12} g_2 + b_6)$$
+$$\times w_{12}$$
 
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
