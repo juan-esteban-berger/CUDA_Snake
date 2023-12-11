@@ -247,21 +247,21 @@ $$
 
 and our loss function is
 
-$$MSE(Y, \hat{Y}) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2$$
+$$MSE(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2$$
 
 and the derivative of our loss function is
 
-$$\frac{\partial}{\partial \hat{y_i}} MSE(Y, \hat{Y})= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} - y_i)$$
+$$\frac{\partial}{\partial \hat{y_i}} MSE(y, \hat{y})= \frac{2}{n} \sum_{i=1}^n (\hat{y_i} - y_i)$$
 
 The backpropagation algorithm calculates the derivative of the loss with respect to each weight. This algorithm starts by calculating the derivatives for the weights of the last layer, and then uses those results to calculate the derivatives of the weights in previous layers. The reason for calculating weights starting from the last layers is that forward propagation uses compositive functions which allows  us to calculate the gradients using the chain rule. Calculating the derivative of the loss with respect to a weight on the last layer can be calculated as follow
 
 $$
-\frac{\partial}{\partial w_{12}} MSE(Y, \hat{Y}) = \frac{\partial}{\partial \hat{y_2}} MSE(Y, \hat{Y}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_{12}} (w_{11} g_{1} + w_{12} g_2 + b_6)
+\frac{\partial}{\partial w_{12}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_{12}} (w_{11} g_{1} + w_{12} g_2 + b_6)
 $$
 
 which can be expanded to
 
-$$\frac{\partial}{\partial w_{12}} MSE(Y, \hat{Y}) = \frac{2}{n} \sum_{i=1}^n (y_2 - \text{relu}(w_{11}g_1 + w_{12}g_2 + b_6))$$
+$$\frac{\partial}{\partial w_{12}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu}(w_{11}g_1 + w_{12}g_2 + b_6))$$
 
 $$\times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6)} \text{relu}(w_{11} g_{1} + w_{12} g_2 + b_6)$$
 
@@ -269,11 +269,23 @@ $$\times g_2$$
 
 Calculating the derivative of the loss with respect to a weight on the second to last layer can be calculated as follow
 
-$$x$$
+$$
+\frac{\partial}{\partial w_{11}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_{11}} (w_{11} g_{1} + w_{12} g_2 + b_6)
+$$
 
 which can be expanded to
 
-$$x$$
+$$\frac{\partial}{\partial w_{8}} MSE(y_2, \hat{y_2}) = \frac{2}{n} \sum_{i=1}^n (y_i - \text{relu}(w_{11}g_1 + w_{12}g_2 + b_6))$$
+
+$$\times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4)} \text{relu}(w_{7} h_{1} + w_{8} h_2 + b_4)$$
+
+$$\times h_2$$
+
+*Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
+
+$$
+\frac{\partial}{\partial w_{8}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{7} h_{1} + w_{8} h_2 + b_4) } \hat{y_2} \times \frac{\partial}{\partial w_{8}} (w_{7} h_{1} + w_{8} h_2 + b_4)
+$$
 
 Since this behavior is repeated for every layer, the backpropagation algorithm can be generalized as follows:
 
