@@ -66,7 +66,7 @@ classDiagram
 ### Bellman Equation
 
 $$
-Q_{\text{updated}}(s,a) = Q(s,a) + \alpha \cdot \left[R(s,a) + \gamma \cdot \text{max}_{a'} \cdot Q(s',a') - Q(s,a)\right]
+Q_{\text{updated}}(s,a) = Q(s,a) + \alpha \cdot \left[R(s,a) + \gamma \cdot \text{max}_{a'}Q(s',a') - Q(s,a)\right]
 $$
 
 where
