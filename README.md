@@ -267,6 +267,12 @@ $$\times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6)} \text{relu}
 
 $$\times g_2$$
 
+Calculating the derivative of the loss with respect to a weight on the second to last layer can be calculated as follow
+
+$$
+\frac{\partial}{\partial w_{11}} MSE(y, \hat{y}) = \frac{\partial}{\partial \hat{y_2}} MSE(y_2, \hat{y_2}) \times \frac{\partial}{\partial (w_{11} g_{1} + w_{12} g_2 + b_6) } \hat{y_2} \times \frac{\partial}{\partial w_{11}} (w_{11} g_{1} + w_{12} g_2 + b_6)
+$$
+
 *Note: In the case of multiple outputs, the total loss is the sum of the loss of each output.*
 
 $$
